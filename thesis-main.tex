@@ -5,6 +5,9 @@
 \usepackage{notes}
 \usepackage{shortcuts}
 \usepackage{acronym}
+\usepackage{amsmath}
+\usepackage{braket}
+\usepackage{amssymb}
 
 \school{\unibo}
 \programme{Corso di Laurea in Ingegneria e Scienze Informatiche}
@@ -238,6 +241,18 @@ le vulnerabilità di questi algoritmi in particolar modo rispetto al calcolo qua
 i vantaggi che i computer quantistici offrono rispetto a quelli classici e come questi
 possono compromettere la sicurezza degli algoritmi classici. in particolare esamineremo l'algoritmo 
 di Shor e il suo impatto su RSA.
+
+%----------------------------------------------------------------------------------------
+
+\chapter[Computazione quantistica]{Computazione quantistica e impatto sulla crittografia classica}
+\label{chap:Computazione quantistica}
+%----------------------------------------------------------------------------------------
+
+Entriamo ora nel vivo della relazione, sviscerare i segreti dietro l'algoritmo di Shor per capire in che modo rompere il protocllo RSA appena descritto.
+Per farlo avremo prima bisogno di introdurre alcuni concetti di base della computazione quantistica che shor utilizza per ottenere i suoi risultati. 
+Una volta compresi questi concetti potremo procedere alla spiegazione dell'algoritmo vero e proprio.
+
+\input{capitolo3}
 
 %----------------------------------------------------------------------------------------
 % BIBLIOGRAPHY

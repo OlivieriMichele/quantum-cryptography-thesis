@@ -1,0 +1,253 @@
+\section{Nozioni base di computazione quantistica}
+
+La computazione quantistica rappresenta un paradigma di calcolo che sfrutta i principi della meccanica quantistica per elaborare l'informazione in modi che non sono possibili con i computer classici\cite[Sezione~1.1]{nielsen2010quantum}.
+Di questi principi di meccanica quantistica non esiste un corrispettivo diretto nel modelli di calcolo classico, e proprio per questo motivo che ne analizziamo gli effetti e le conseguenze.
+
+\subsection{Richiami essenziali di meccanica quantistica}
+
+In questa sezione non si fornisce una trattazione formale della teoria, ma si introducono i concetti essenziali necessari a comprendere il funzionamento dei computer quantistici e dei meccanismi che consentono loro di superare i limiti della computazione classica.
+
+Il primo concetto fondamentale è quello di \textbf{\emph{stato quantistico}}. Mentre un bit classico può assumere esclusivamente i valori 0 o 1, un sistema quantistico può trovarsi in una \emph{sovrapposizione} di stati\cite[Sezione~1.2]{nielsen2010quantum}. Questo non significa che sia 0 e 1 "contemporaneamente" in senso magico ma semplicemente che lo stato di un qubit può essere descritto come una combinazione lineare degli stati base $\ket{0}$ e $\ket{1}$ : $$\ket{\psi} = \alpha \ket{0} + \beta \ket{1}$$ con coefficienti complessi che ne determinano le probabilità di osservazione\cite[p.~13]{nielsen2010quantum}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{./figures/bloch_sphere.png}
+    \caption{Bloch sphere representation of a qubit.}
+    \label{fig:bloch_sphere}
+\end{figure}
+
+Un secondo concetto chiave è l'\textbf{\emph{entanglement}}, una forma di correlazione quantistica tra più qubit per cui lo stato complessivo del sistema non può essere descritto come il prodotto degli stati dei singoli qubit\cite[Sezione~2.2.8]{nielsen2010quantum}. In presenza di entanglement, la misura di un qubit influisce istantaneamente sullo stato degli altri, indipendentemente dalla distanza che li separa\cite[Sezione~1.2.1]{nielsen2010quantum}. Questa proprietà consente di rappresentare e manipolare informazioni in modo non separabile, ciò significa che le operazioni su un qubit possono avere effetti immediati sugli altri qubit entangled con esso.
+
+Il terzo elemento fondamentale è la \textbf{\emph{misura}}. Quando uno stato quantistico viene misurato, la sovrapposizione collassa e il risultato ottenuto è un valore classico\cite[Sezione~1.2]{nielsen2010quantum}. L'esito della misura è probabilistico e dipende dallo stato del sistema immediatamente prima dell'osservazione\cite[Sezione~2.2.3]{nielsen2010quantum}.
+
+Sovrapposizione, entanglement e misura costituiscono i principi alla base della differenza concettuale tra computazione classica e computazione quantistica, e determinano il modo in cui l'informazione viene elaborata in un sistema quantistico\cite[Sezione~1.3]{nielsen2010quantum}.
+
+\subsection*{Qubit e operazioni quantistiche}
+
+L'unità fondamentale di informazione in un computer quantistico è quindi il qubit\cite[Sezione~1.2]{nielsen2010quantum}.
+Dal punto di vista matematico, un qubit è rappresentato come un vettore unitario in uno spazio di Hilbert bidimensionale, mentre un registro composto da $n$ qubit è descritto in uno spazio di dimensione $2^n$.
+
+Le operazioni sui qubit sono realizzate mediante \emph{porte quantistiche}, che corrispondono a trasformazioni lineari e reversibili, descritte da operatori unitari. A differenza delle porte logiche classiche, le porte quantistiche agiscono su stati in sovrapposizione, modificando simultaneamente tutte le componenti dello stato quantistico.
+
+Matematicamente, queste porte sono rappresentate come matrici unitarie, il che conferisce loro due proprietà cruciali: la somma delle probabilità dei possibili stati deve essere sempre pari a 1 e ogni operazione deve essere reversibile (ovvero, ogni porta ha una sua inversa che può annullare l'operazione).
+Le principali porte quantistiche\cite[Sezioni~1.3.1, 1.3.2, 1.3.4, 1.3.6, 4.2, 4.5, 5.1]{nielsen2010quantum}:
+\begin{itemize}
+    \item porte a bit singolo come: la porta Hadamard (H), che viene usata per mettere i qubit in superposizioni, la porta Pauli-X (equivalente a una NOT classica), e le porte di Pauli(X, Y, Z) che ruotano il vettore.
+    \item porte a più bit che realizzano operazioni condizionate tra due qubit, fondamentali per creare entanglement.
+    \item porta SWAP che scambia lo stato di due qubit, la porta di Fase Controllata (Rk) utile per la QFT.
+    \item porte specializzate costruite per specifici algoritmi a partire da queste.
+\end{itemize}
+L'uso combinato di queste porte consente di elaborare, in un singolo passo computazionale, un insieme di stati che cresce esponenzialmente con il numero di qubit. Tale fenomeno è noto come \emph{parallelismo quantistico} e rappresenta una delle principali fonti di vantaggio rispetto al calcolo classico, pur non traducendosi automaticamente in un'accelerazione per qualsiasi problema\cite[Sezioni~1.4.2, 4.5.4]{nielsen2010quantum}.
+
+\subsection*{Modello di calcolo quantistico}
+
+Il funzionamento di un computer quantistico segue un modello di calcolo specifico, distinto da quello deterministico utilizzato nei computer classici.
+Un algoritmo quantistico è generalmente articolato in tre fasi principali\cite[Sezioni~1.3.4, 4.6]{nielsen2010quantum}:
+\begin{itemize}
+    \item preparazione dello stato iniziale;
+    \item applicazione di una sequenza di porte quantistiche;
+    \item misura finale del sistema.
+\end{itemize}
+Durante la fase di evoluzione, lo stato quantistico del sistema viene trasformato in modo deterministico secondo le leggi della meccanica quantistica. La natura probabilistica emerge esclusivamente al momento della misura, quando lo stato viene proiettato su uno dei possibili risultati osservabili.
+
+La potenza del modello di calcolo quantistico non risiede nella possibilità di valutare esplicitamente tutte le soluzioni di un problema, bensì nella capacità di sfruttare il fenomeno dell'\emph{interferenza quantistica}. Attraverso opportune sequenze di operazioni, le ampiezze associate alle soluzioni corrette possono essere amplificate, mentre quelle delle soluzioni errate vengono attenuate\cite[Sezioni~1.4.3, 6.1.3]{nielsen2010quantum}.
+
+\subsection{Collegamento con la crittografia}
+I concetti introdotti in questa sezione costituiscono il fondamento teorico per analizzare l'impatto della computazione quantistica sulla crittografia moderna. In particolare, l'uso combinato di sovrapposizione, entanglement e interferenza consente di affrontare in modo efficiente problemi come la fattorizzazione di interi e il calcolo del logaritmo discreto\cite[Sezioni~1.4, 5.3]{nielsen2010quantum}.
+
+\section{Algoritmi quantistici rilevanti: Shor}
+
+L'algoritmo di Shor rappresenta uno dei risultati più significativi nel campo della computazione quantistica, non solo per le sue implicazioni sulla crittografia, ma anche per la profondità delle idee matematiche che lo compongono\cite[Sezione~5.3]{nielsen2010quantum}. Infatti per comprendere appieno il funzionamento di questo algoritmo, è necessario procedere con un'analisi rigorosa che parta dai fondamenti matematici, prescindendo inizialmente dagli aspetti quantistici. 
+
+L'obiettivo quindi di questa sezione è chiarire perché l'algoritmo funziona dal punto di vista matematico, e solo in una fase successiva dell'analisi vedremo come viene accelerato dal computer quantistico.
+
+\subsection*{Il problema della fattorizzazione}
+
+Il punto di partenza è il problema della fattorizzazione di interi. Dato un intero composto $N = p \cdot q$, dove $p$ e $q$ sono numeri primi di grandi dimensioni, il problema consiste nel determinare $p$ e $q$ conoscendo solamente $N$. La difficoltà computazionale della fattorizzazione deriva da due caratteristiche fondamentali: in primo luogo, non è noto alcun algoritmo classico in grado di fattorizzare un numero in tempo polinomiale rispetto alla dimensione dell'input; in secondo luogo, i tentativi diretti di fattorizzazione crescono rapidamente con l'aumentare della dimensione di $N$, rendendo il problema intrattabile per valori sufficientemente grandi.
+
+L'intuizione fondamentale di Shor consiste nel trasformare il problema della fattorizzazione in un problema di natura diversa, caratterizzato da una struttura matematica più favorevole\cite[Sezione~5.3.2]{nielsen2010quantum}. Questa trasformazione permette di ricondurre la ricerca dei fattori primi a un problema di teoria dei numeri che, come vedremo, può essere risolto in modo efficiente sfruttando le peculiarità della computazione quantistica.
+
+\subsection{Dalla fattorizzazione alla teoria dei numeri}
+
+La strategia di Shor si basa sull'osservazione che la fattorizzazione può essere ricondotta al problema della determinazione del periodo di una funzione. Questa connessione non è immediata e richiede una serie di passaggi matematici che è necessario esplicitare con precisione.
+
+Il primo passo consiste nella scelta di un numero intero $a$ tale che $1 < a < N$ e $\gcd(a, N) = 1$. La condizione sulla coprimalità è essenziale: se infatti $\gcd(a, N) \neq 1$, avremmo già trovato un fattore non banale di $N$ semplicemente calcolando il massimo comun divisore. Una volta scelto $a$, si considera la funzione esponenziale modulare definita come:
+\[
+f(x) = a^x \bmod N
+\]
+
+Questa funzione possiede una proprietà fondamentale: è periodica. Più precisamente, esiste un minimo intero $r > 0$ tale che:
+\[
+a^r \equiv 1 \pmod{N}
+\]
+
+Questo valore $r$ è chiamato ordine di $a$ modulo $N$. L'esistenza di tale periodo è garantita dal teorema di Eulero, secondo cui $a^{\phi(N)} \equiv 1 \pmod{N}$, dove $\phi(N)$ è la funzione di Eulero\cite[Sezione~A4.2]{nielsen2010quantum}. Il periodo cercato è dunque un divisore di $\phi(N)$.
+
+\subsection{L'utilità del periodo per la fattorizzazione}
+
+A questo punto sorge naturale una domanda: perché la conoscenza del periodo $r$ dovrebbe aiutarci a fattorizzare $N$? La risposta risiede in una proprietà algebrica profonda che collega l'ordine di un elemento alla struttura moltiplicativa del gruppo $(\mathbb{Z}/N\mathbb{Z})^*$\cite[Sezione~5.3.2]{nielsen2010quantum}.
+
+Se il periodo $r$ soddisfa due condizioni specifiche, ovvero se $r$ è pari e se $a^{r/2} \not\equiv -1 \pmod{N}$, allora è possibile estrarre fattori non banali di $N$ calcolando:
+\[
+\gcd(a^{r/2} - 1, N) \quad \text{e} \quad \gcd(a^{r/2} + 1, N)
+\]
+
+Questa è la chiave matematica dell'intero algoritmo\cite{ibmquantum2024shor}. Per comprendere perché questa procedura funziona, è necessario esaminare più da vicino la struttura algebrica sottostante. Dalla relazione $a^r \equiv 1 \pmod{N}$ segue immediatamente che:
+\[
+a^r - 1 \equiv 0 \pmod{N}
+\]
+
+Poiché $r$ è pari per ipotesi, possiamo fattorizzare il termine $a^r - 1$ utilizzando la differenza di quadrati\cite[p.~233]{nielsen2010quantum}:
+\[
+a^r - 1 = (a^{r/2})^2 - 1 = (a^{r/2} - 1)(a^{r/2} + 1)
+\]
+
+Ne consegue che:
+\[
+(a^{r/2} - 1)(a^{r/2} + 1) \equiv 0 \pmod{N}
+\]
+
+Questa congruenza ci dice che $N$ divide il prodotto $(a^{r/2} - 1)(a^{r/2} + 1)$. Tuttavia, per ipotesi, $a^{r/2} \not\equiv -1 \pmod{N}$, il che significa che $a^{r/2} + 1$ non è divisibile per $N$. Analogamente, poiché $r$ è il periodo minimo, anche $a^{r/2} - 1$ non può essere divisibile per $N$ (altrimenti $r/2$ sarebbe il periodo). Di conseguenza, $N$ divide il prodotto di due fattori senza dividere ciascun fattore singolarmente. Questo implica necessariamente che ciascuno dei due fattori condivide almeno un divisore primo con $N$, ma non tutti\cite[Appendice~4.3, Teorema~5.2]{nielsen2010quantum}. Il calcolo del massimo comun divisore permette quindi di estrarre questi divisori non banali.
+
+\subsection{Esempio numerico completo}
+
+Per rendere concreti i concetti esposti, consideriamo un esempio numerico completo. Supponiamo di voler fattorizzare $N = 15$. Scegliamo $a = 2$ e verifichiamo che $\gcd(2, 15) = 1$, come richiesto\cite{ibmquantum2024shor}. Procediamo quindi al calcolo della sequenza di potenze di $a$ modulo $N$:
+
+\begin{center}
+\begin{tabular}{c|c}
+$x$ & $2^x \bmod 15$ \\
+\hline
+1 & 2 \\
+2 & 4 \\
+3 & 8 \\
+4 & 1
+\end{tabular}
+\end{center}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{./figures/shor_periodicity.png}
+    \caption{Visualizzazione della periodicità della funzione $f(x) = 2^x \bmod 15$. 
+    I colori evidenziano i cicli periodici di lunghezza $r = 4$. Elaborazione propria 
+    basata sull'esempio presentato da IBM Quantum Documentation.}
+    \label{fig:shor_periodicity}
+\end{figure}
+
+Osserviamo che il valore si ripete dopo quattro iterazioni, pertanto il periodo è $r = 4$. Verifichiamo ora le condizioni necessarie: il periodo è effettivamente pari, e calcoliamo $a^{r/2} = 2^2 = 4$. Poiché $4 \not\equiv -1 \pmod{15}$ (infatti $4 \equiv 4 \pmod{15}$), entrambe le condizioni sono soddisfatte\cite[Box~5.4]{nielsen2010quantum}. Possiamo quindi applicare la formula per estrarre i fattori:
+\begin{align*}
+\gcd(4 - 1, 15) &= \gcd(3, 15) = 3 \\
+\gcd(4 + 1, 15) &= \gcd(5, 15) = 5
+\end{align*}
+
+Abbiamo così ottenuto la fattorizzazione $15 = 3 \cdot 5$.
+
+\subsection*{La complessità computazionale del metodo}
+
+A questo punto è importante sottolineare quali passaggi del metodo siano effettivamente computazionalmente trattabili e quale rappresenti invece il collo di bottiglia. I passaggi che non presentano difficoltà computazionali significative includono il calcolo del massimo comun divisore, che può essere eseguito efficientemente tramite l'algoritmo di Euclide\cite[Sezione~A4.2]{nielsen2010quantum}, e l'esecuzione di esponenziazioni modulari, che può essere realizzata in tempo polinomiale mediante l'algoritmo di esponenziazione veloce\cite[Box~5.2]{nielsen2010quantum}.
+
+Il passaggio critico dell'intero procedimento è la determinazione del periodo $r$. Nel contesto della computazione classica, il calcolo del periodo della funzione $a^x \bmod N$ richiede essenzialmente di valutare la funzione ripetutamente fino a quando non si osserva la ripetizione del valore iniziale. Il numero di valutazioni necessarie nel caso peggiore può essere dell'ordine di $N$, e anche nel caso medio il numero di operazioni cresce in modo tale da rendere il problema intrattabile per valori di $N$ sufficientemente grandi. È precisamente in questo passaggio che risiede il collo di bottiglia computazionale che impedisce alla fattorizzazione classica di essere efficiente.
+
+\subsection*{Casi di fallimento e strategie di gestione}
+
+È importante osservare che il metodo descritto non ha sempre successo. Possono verificarsi due situazioni in cui la procedura non produce una fattorizzazione: il periodo $r$ potrebbe risultare dispari, oppure potrebbe accadere che $a^{r/2} \equiv -1 \pmod{N}$. In entrambi questi casi, non è possibile applicare la fattorizzazione attraverso il massimo comun divisore nel modo descritto. Tuttavia, è possibile dimostrare che la probabilità di incorrere in uno di questi casi sfavorevoli è relativamente bassa\cite[Teorema~A4.13]{nielsen2010quantum}. Inoltre, qualora si verifichi uno di questi casi, è sufficiente scegliere un valore diverso di $a$ e ripetere l'intero procedimento\cite{ibmquantum2024shor}. Con alta probabilità, dopo pochi tentativi si otterrà un periodo che soddisfa le condizioni necessarie.
+
+\subsection*{Sintesi del contributo matematico}
+Ricapitolando quanto esposto, dal punto di vista strettamente matematico, l'algoritmo di Shor opera attraverso una sequenza logica di trasformazioni: in primo luogo, trasforma il problema della fattorizzazione in un problema di determinazione della periodicità di una funzione; in secondo luogo, sfrutta proprietà fondamentali dell'aritmetica modulare per collegare il periodo alla struttura dei fattori di $N$; in terzo luogo, riduce il problema al calcolo dell'ordine di un elemento modulo $N$; infine, estrae i fattori cercati attraverso il calcolo del massimo comun divisore\cite[Sezioni~5.3.1, 5.3.2, Teorema~A4.11]{nielsen2010quantum}.
+
+È fondamentale sottolineare che fino a questo punto non è stato introdotto alcun concetto di natura quantistica. Tutto quanto discusso appartiene al dominio della matematica classica e della teoria dei numeri. Il contributo essenziale della computazione quantistica risiede nella capacità di rendere efficiente il passaggio centrale, ovvero la determinazione del periodo\cite[Sezione~5.3.1]{nielsen2010quantum}. Mentre su un computer classico questo passaggio è computazionalmente intrattabile per numeri di grandi dimensioni, vedremo che un computer quantistico è in grado di eseguirlo in tempo polinomiale\cite[p.~216]{nielsen2010quantum}, rendendo così l'intero algoritmo efficiente e ponendo una seria minaccia alla sicurezza dei sistemi crittografici basati sulla difficoltà della fattorizzazione.
+
+\subsection{La trasformata di Fourier quantistica}
+
+Per comprendere come un computer quantistico risolva efficientemente il problema della determinazione del periodo, è necessario introdurre uno strumento matematico fondamentale: la trasformata di Fourier\cite[Sezione~5.1]{nielsen2010quantum}. L'obiettivo di questa parte dell'analisi è chiarire perché la trasformata di Fourier rappresenti lo strumento naturale per affrontare problemi di periodicità e come la sua versione quantistica costituisca l'elemento centrale dell'algoritmo di Shor. Procederemo costruendo il ragionamento a partire da concetti elementari, senza assumere familiarità con gli aspetti tecnici della trasformata.
+
+\paragraph{Il ruolo della trasformata di Fourier}
+
+Siamo quindi arrivati al problema centrale: determinare il periodo della funzione $f(x) = a^x \bmod N$. Ricordiamo che il calcolo dei singoli valori di $f(x)$ non presenta difficoltà computazionali: dato un valore specifico di $x$, è possibile calcolare $f(x)$ in modo efficiente. La difficoltà risiede nella determinazione della frequenza con cui i valori della funzione si ripetono.
+
+La trasformata di Fourier è uno strumento matematico che permette di operare un cambio di prospettiva fondamentale. Concettualmente, essa consente di passare da una descrizione di un segnale o di una funzione nel cosiddetto ``dominio del tempo'' a una descrizione nel ``dominio delle frequenze''. Il periodo di una funzione è intrinsecamente una proprietà legata alle frequenze: una funzione periodica con periodo $r$ può essere interpretata come un segnale che oscilla con frequenza fondamentale $1/r$. Questa osservazione costituisce la chiave per comprendere perché la trasformata di Fourier sia lo strumento appropriato per estrarre informazioni sulla periodicità.
+
+\paragraph{Intuizione alla base della trasformata di Fourier}
+
+Visto che l'ottica di questa ricerca è capire l'idea di fondo che si cela dietro shor, prima di vedere la formulazione matematica precisa, è utile sviluppare un'intuizione del funzionamento della trasformata di Fourier attraverso un esempio più semplice. Consideriamo un segnale periodico, che potrebbe rappresentare un'onda sonora, una vibrazione meccanica o qualsiasi altra grandezza fisica che varia nel tempo secondo un pattern ripetitivo. Nel dominio temporale, osserviamo come il segnale evolve istante per istante, registrando il valore della grandezza in funzione del tempo.
+
+La trasformata di Fourier effettua un'operazione concettualmente diversa: prende il segnale nel dominio temporale e lo scompone in una somma di oscillazioni elementari, ciascuna caratterizzata da una frequenza ben definita. In altre parole, invece di descrivere quando il segnale assume determinati valori, la trasformata descrive quali frequenze compongono il segnale e con quale intensità ciascuna frequenza contribuisce. Il periodo del segnale originale emerge naturalmente da questa rappresentazione in termini di frequenze.
+
+Per rendere questa idea più concreta, si consideri un segnale definito come la somma di due sinusoidi:
+\[
+s(t) = \sin(2\pi t) + \sin(4\pi t)
+\]
+
+Nel dominio temporale, questo segnale appare come un'onda dalla forma piuttosto irregolare, risultante dalla sovrapposizione delle due componenti. Tuttavia, nel dominio delle frequenze, la trasformata di Fourier rivela immediatamente la struttura sottostante: il segnale è composto da esattamente due componenti, una con frequenza $1$ e una con frequenza $2$. La trasformata di Fourier serve precisamente a estrarre questa decomposizione in componenti frequenziali, permettendo di identificare le frequenze fondamentali che caratterizzano il segnale.
+
+\paragraph{La trasformata di Fourier discreta}
+
+Nel contesto dell'algoritmo di Shor, non abbiamo a che fare con segnali continui nel tempo, ma piuttosto con sequenze discrete di valori. La funzione $f(x) = a^x \bmod N$ produce una sequenza di valori interi $f(0), f(1), f(2), \ldots$ che si ripete con periodo $r$. Per analizzare questo tipo di segnali discreti è necessario utilizzare la trasformata di Fourier discreta, comunemente indicata con l'acronimo DFT (Discrete Fourier Transform)\cite[Sezione~5.1]{nielsen2010quantum}.
+
+La trasformata di Fourier discreta opera su una sequenza finita di valori $x_0, x_1, \ldots, x_{N-1}$ e la trasforma in un'altra sequenza $X_0, X_1, \ldots, X_{N-1}$, dove ciascun coefficiente $X_k$ misura l'intensità con cui la frequenza $k$ è presente nel segnale originale. La definizione formale della trasformata di Fourier discreta è data da:
+\[
+X_k = \sum_{n=0}^{N-1} x_n \, e^{-2\pi i kn/N}
+\]
+
+Sebbene non sia necessario memorizzare questa formula nei dettagli, è importante comprenderne il significato concettuale. La sommatoria confronta il segnale originale con tutte le possibili oscillazioni discrete di frequenza $k$, e il valore di $X_k$ misura quanto bene l'oscillazione di frequenza $k$ si ``accorda'' con il segnale. Le oscillazioni che sono in fase con il segnale contribuiscono costruttivamente, mentre quelle fuori fase tendono a cancellarsi.
+
+\paragraph{Periodicità e concentrazione spettrale}
+
+Il collegamento diretto tra periodicità e trasformata di Fourier emerge quando si considera il caso di una funzione perfettamente periodica. Se una funzione possiede periodo $r$, la sua trasformata di Fourier non è distribuita uniformemente su tutte le frequenze, ma risulta concentrata su valori specifici. In particolare, l'energia spettrale è localizzata in corrispondenza di frequenze che sono multipli interi di $1/r$.
+
+Questa proprietà implica che, osservando il risultato della trasformata di Fourier, è possibile ricavare informazioni precise sul periodo $r$. I picchi nella trasformata identificano le frequenze caratteristiche, e da queste frequenze si può risalire al periodo. Tuttavia, nel contesto della computazione classica, il calcolo della trasformata di Fourier discreta richiede un numero di operazioni che, anche utilizzando algoritmi efficienti come la FFT (Fast Fourier Transform), cresce almeno proporzionalmente al numero di campioni. Per sequenze di lunghezza comparabile a $N$, questo rappresenta comunque un costo computazionale significativo che non risolve il problema della complessità della fattorizzazione.
+
+\subsection{Dalla DFT alla trasformata di Fourier quantistica}
+
+La trasformata di Fourier quantistica, comunemente indicata con l'acronimo QFT (Quantum Fourier Transform), rappresenta l'adattamento della trasformata di Fourier discreta al contesto della computazione quantistica\cite[Sezione~5.2]{nielsen2010quantum}. È fondamentale comprendere che la QFT non introduce nuove idee matematiche: si tratta essenzialmente della stessa trasformazione matematica definita dalla DFT, ma applicata a stati quantistici invece che a sequenze di numeri classici.
+
+In un computer quantistico, una sequenza di valori viene rappresentata attraverso una sovrapposizione quantistica, ovvero uno stato della forma:
+\[
+\sum_x \alpha_x \ket{x}
+\]
+
+dove i coefficienti complessi $\alpha_x$ rappresentano le ampiezze di probabilità associate a ciascun valore di base $\ket{x}$. La QFT trasforma questo stato in un nuovo stato:
+\[
+\sum_k \beta_k \ket{k}
+\]
+
+dove i coefficienti $\beta_k$ sono esattamente la trasformata di Fourier dei coefficienti originali $\alpha_x$. In altre parole, la QFT realizza fisicamente, a livello di stato quantistico, la stessa operazione matematica che la DFT realizza a livello di array di numeri.
+
+\paragraph{Il vantaggio computazionale della QFT}
+
+La ragione per cui la QFT rappresenta un avanzamento rivoluzionario rispetto alla DFT classica risiede in una proprietà fondamentale della computazione quantistica: la capacità di operare simultaneamente su una sovrapposizione di stati\cite[Sezioni~5.2.1, 5.2.2]{nielsen2010quantum}. Nel computer quantistico, tutti i coefficienti $\alpha_x$ esistono contemporaneamente nella sovrapposizione, e la QFT agisce sull'intera sovrapposizione in un'unica operazione coerente.
+
+Il risultato di questa applicazione coerente della trasformata è che le ampiezze dei diversi stati interferiscono tra loro secondo le leggi della meccanica quantistica. Le frequenze che sono compatibili con la periodicità della funzione originale vengono amplificate attraverso \textbf{interferenza costruttiva}, mentre le frequenze incompatibili vengono soppresse attraverso \textbf{interferenza distruttiva}. 
+
+Quando si effettua una misura sullo stato risultante, si ottiene con alta probabilità un valore che contiene informazione sul periodo cercato.
+
+Difatti questo è il principale snodo del teorema, il punto in cui interviene positivamente l'utilizzo dela quantistica, da qui in poi sarà necessario fare altre operazioni per estrarre correttamemnte l'informazione, infatti è importante sottolineare che la misura non fornisce direttamente il periodo $r$, ma piuttosto un valore dal quale è possibile estrarre $r$, ma il tutto semplicemente utilizzando tecniche matematiche classiche. In particolare, si utilizza l'algoritmo delle frazioni continue per approssimare il rapporto misurato con una frazione che ha il periodo come denominatore\cite[Sezione~5.3.3]{nielsen2010quantum}. Questa fase di post-elaborazione classica ci serve per completare l'algoritmo.
+
+\paragraph{Esempio concettuale del meccanismo}
+
+Per rendere più concreto il meccanismo di estrazione del periodo, consideriamo un esempio semplificato. Supponiamo che la funzione analizzata abbia periodo $r = 4$ e che il registro quantistico abbia dimensione $Q$. Dopo l'applicazione della QFT, lo stato quantistico non è distribuito uniformemente, ma presenta concentrazioni di ampiezza in corrispondenza di valori approssimabili come:
+\[
+k \approx \frac{m}{4} \cdot Q
+\]
+
+dove $m$ è un intero. Quando si effettua la misura, si ottiene con alta probabilità uno di questi valori di $k$. Dal rapporto:
+\[
+\frac{k}{Q} \approx \frac{m}{r}
+\]
+è possibile ricostruire il periodo $r$ attraverso l'approssimazione con frazioni continue\cite{ibmquantum2024shor}.
+Questo esempio illustra il collegamento diretto tra l'applicazione della QFT, l'estrazione di informazione sulla periodicità attraverso la misura quantistica, e il recupero finale del periodo che permette la fattorizzazione.
+
+\paragraph{La natura del vantaggio quantistico}
+
+Avendo capito il principio di funzionamento di shor possiamo chiarire meglio un aspetto concettuale che spesso genera confusione. Il computer quantistico non ottiene il suo vantaggio semplicemente ``provando tutte le frequenze in parallelo'' né ``calcolando la trasformata esplicitamente come farebbe una CPU classica''. Il meccanismo è qualitativamente diverso: il computer quantistico prepara uno stato quantistico con una struttura specifica, sfrutta le proprietà di interferenza e sovrapposizione per far emergere le frequenze rilevanti, e produce il periodo come risultato di un processo probabilistico governato dalle leggi della meccanica quantistica.
+
+La QFT è il meccanismo matematico che rende possibile questa interferenza controllata. Essa permette di organizzare le ampiezze quantistiche in modo tale che, al momento della misura, i valori che contengono informazione sul periodo abbiano probabilità di osservazione significativamente maggiore rispetto agli altri. Questa capacità di manipolare coerentemente le ampiezze di probabilità attraverso interferenza quantistica è ciò che consente al computer quantistico di ottenere un vantaggio esponenziale rispetto ai metodi classici.
+
+\section{Considerazioni finali}
+
+Riassumendo brevemente, 
+\begin{itemize}
+    \item abbiamo introdotto i concetti di meccanica quantistica necessari a comprendere il funzionamento di un computer quantistico;
+    \item abbiamo convertito il problema della fattorizzazione in un problema di determinazione del periodo di una funzione esponenziale modulare;
+    \item abbiamo poi trovato un algoritmo per calcolarne il perido, e l'abbiamo ottimizzato sostituendo la DFT (che costituiva il contributo con complessità computazionalemnte non polinomiale) con la QFT per ottenere un vantaggio esponenziale rispetto ai metodi classici, permettendo così di risolvere il problema della fattorizzazione in tempo polinomiale su un computer quantistico.
+\end{itemize}
+Ora che conosciamo il funzionamento matematico/teorico dell'algoritmo di Shor, possiamo passare alla prossima fare della trattazione: analizzare la risposta della comunità crittografica a questa minaccia: la crittografia post-quantistica.
