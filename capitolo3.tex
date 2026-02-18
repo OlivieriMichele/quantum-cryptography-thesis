@@ -243,6 +243,101 @@ Avendo capito il principio di funzionamento di shor possiamo chiarire meglio un 
 
 La QFT è il meccanismo matematico che rende possibile questa interferenza controllata. Essa permette di organizzare le ampiezze quantistiche in modo tale che, al momento della misura, i valori che contengono informazione sul periodo abbiano probabilità di osservazione significativamente maggiore rispetto agli altri. Questa capacità di manipolare coerentemente le ampiezze di probabilità attraverso interferenza quantistica è ciò che consente al computer quantistico di ottenere un vantaggio esponenziale rispetto ai metodi classici.
 
+\section{L'Algoritmo di Grover}
+
+A differenza dell'algoritmo di Shor, che si occupa di problemi specifici come la fattorizzazione e il logaritmo discreto, l'algoritmo di Grover affronta un problema più generale: la ricerca in un database non strutturato. Nonostante la sua generalità, l'algoritmo di Grover ha implicazioni significative per la crittografia, in particolare per i sistemi a chiave simmetrica, poiché fornisce un metodo più efficiente per eseguire attacchi brute-force. Cerchiamo quindi di capire come funziona l'algoritmo di Grover, partendo dai concetti matematici di base e arrivando a una comprensione intuitiva del suo meccanismo.
+
+L'algoritmo di Grover, introdotto da Lov Grover nel 1996~\cite{grover1996fast}, rappresenta uno dei pilastri della computazione quantistica. A differenza dell'algoritmo di Shor, che offre un'accelerazione esponenziale rispetto alla controparte classica, Grover fornisce un'accelerazione quadratica nella risoluzione di problemi di ricerca non strutturata.
+
+\subsection*{Definizione del Problema}
+
+L'algoritmo affronta il problema di trovare un elemento specifico all'interno di un database non strutturato di dimensione $N = 2^n$. In un contesto classico, identificare l'unico elemento che soddisfa una determinata condizione richiederebbe mediamente $N/2$ operazioni (e $N$ nel caso peggiore). L'algoritmo di Grover permette di ottenere il risultato in circa $\sqrt{N}$ passi, conseguendo così una riduzione quadratica della complessità computazionale.
+
+\subsection*{Componenti Fondamentali}
+
+Il funzionamento dell'algoritmo si basa sulla manipolazione delle ampiezze di probabilità degli stati quantistici attraverso la ripetizione di un ciclo denominato \textit{iterazione di Grover}. Gli elementi chiave sono i seguenti.
+
+\paragraph{Inizializzazione.}
+Il sistema viene preparato in una sovrapposizione uniforme di tutti i possibili $N$ stati mediante l'applicazione della trasformata di Walsh-Hadamard $H^{\otimes n}$, garantendo che ogni stato $\ket{x}$ abbia la stessa ampiezza iniziale $1/\sqrt{N}$:
+\begin{equation}
+    \ket{\psi_0} = H^{\otimes n}\ket{0}^{\otimes n} = \frac{1}{\sqrt{N}} \sum_{x=0}^{N-1} \ket{x}.
+\end{equation}
+
+\paragraph{L'Oracolo $\mathcal{O}$.}
+L'oracolo è una funzione unitaria in grado di riconoscere la soluzione del problema. Matematicamente, esso agisce invertendo la fase dell'ampiezza dello stato marcato $\ket{\omega}$, lasciando invariati tutti gli altri stati:
+\begin{equation}
+    \mathcal{O}\ket{x} = (-1)^{f(x)}\ket{x},
+\end{equation}
+dove $f(x) = 1$ se $x = \omega$ (stato soluzione) e $f(x) = 0$ altrimenti.
+
+\paragraph{L'Operatore di Diffusione $\mathcal{D}$.}
+L'operatore di diffusione, definito come
+\begin{equation}
+    \mathcal{D} = 2\ket{\psi_0}\bra{\psi_0} - I,
+\end{equation}
+esegue un'operazione nota come \textit{inversione rispetto alla media} (inversion about average). Il suo effetto è quello di amplificare l'ampiezza dello stato marcato dall'oracolo e di attenuare quella degli stati rimanenti, sfruttando i fenomeni di interferenza costruttiva e distruttiva.
+
+\subsection*{Esempio Numerico: Ricerca su 2 Qubit ($N=4$)}
+
+Consideriamo il caso ideale in cui il database ha $N = 4$ elementi ($n = 2$ qubit) e una sola soluzione ($M = 1$). In questo scenario, il numero ottimale di iterazioni di Grover è $k = \lfloor \frac{\pi}{4}\sqrt{4} \rfloor = 1$, dunque è sufficiente una singola iterazione per ottenere la soluzione con probabilità massima.
+
+\paragraph{1. Inizializzazione.}
+Applichiamo la trasformata di Walsh-Hadamard $H^{\otimes 2}$ allo stato $\ket{00}$, ottenendo la sovrapposizione uniforme:
+\begin{equation}
+    \ket{\psi_0} = \frac{1}{2}\bigl(\ket{00} + \ket{01} + \ket{10} + \ket{11}\bigr).
+\end{equation}
+Tutte le ampiezze iniziali sono uguali: $\alpha_i = \frac{1}{2} = 0.5$.
+
+\paragraph{2. Applicazione dell'Oracolo.}
+Supponiamo che la soluzione sia lo stato $\ket{11}$. L'oracolo $\mathcal{O}$ inverte il segno dell'ampiezza di tale stato, lasciando invariati gli altri:
+\begin{equation}
+    \ket{\psi_1} = \mathcal{O}\ket{\psi_0} = \frac{1}{2}\ket{00} + \frac{1}{2}\ket{01} + \frac{1}{2}\ket{10} - \frac{1}{2}\ket{11}.
+\end{equation}
+Il vettore delle ampiezze è ora $\{\, 0.5,\; 0.5,\; 0.5,\; -0.5 \,\}$.
+
+\paragraph{3. Inversione rispetto alla Media.}
+Applichiamo l'operatore di diffusione $\mathcal{D}$, che realizza l'inversione rispetto alla media delle ampiezze.
+\begin{enumerate}[label=(\roman*)]
+    \item Calcoliamo la media delle ampiezze correnti:
+    \begin{equation}
+        \langle \alpha \rangle = \frac{1}{4}\bigl(0.5 + 0.5 + 0.5 + (-0.5)\bigr) = \frac{1}{4} \cdot 1.0 = 0.25.
+    \end{equation}
+    \item Applichiamo la trasformazione $\alpha_i \mapsto 2\langle\alpha\rangle - \alpha_i$ a ciascuna ampiezza:
+    \begin{itemize}
+        \item Stati non soluzione ($\alpha_i = 0.5$): \quad $2(0.25) - 0.5 = 0.0$.
+        \item Stato soluzione ($\alpha_i = -0.5$): \quad $2(0.25) - (-0.5) = 1.0$.
+    \end{itemize}
+\end{enumerate}
+
+\paragraph{4. Risultato.}
+Lo stato del sistema dopo una singola iterazione di Grover è:
+\begin{equation}
+    \ket{\psi_2} = \mathcal{D}\ket{\psi_1} = \ket{11}.
+\end{equation}
+L'ampiezza dello stato soluzione è stata amplificata a $1.0$, mentre tutte le ampiezze degli stati non soluzione sono state annullate. La probabilità di misurare la soluzione corretta è pertanto del $100\%$ con una singola interrogazione all'oracolo. A titolo di confronto, un algoritmo classico richiederebbe in media $\frac{N+1}{2} = 2.5$ tentativi per individuare la soluzione in un database di 4 elementi.
+
+\subsection*{Interpretazione Geometrica}
+
+L'algoritmo di Grover ammette un'elegante interpretazione geometrica. Lo spazio di Hilbert rilevante può essere ridotto a un sottospazio bidimensionale, definito dal vettore soluzione $\ket{\omega}$ e dal vettore
+\begin{equation}
+    \ket{s'} = \frac{1}{\sqrt{N-1}}\sum_{x \neq \omega}\ket{x},
+\end{equation}
+che rappresenta la sovrapposizione uniforme di tutti gli stati non risolutivi. In questo spazio, ogni iterazione di Grover $G = \mathcal{D}\mathcal{O}$ corrisponde a una rotazione del vettore di stato di un angolo fisso
+\begin{equation}
+    \theta = 2\arcsin\!\left(\sqrt{\frac{M}{N}}\right),
+\end{equation}
+dove $M$ è il numero di soluzioni valide. Dopo circa
+\begin{equation}
+    k \approx \frac{\pi}{4}\sqrt{\frac{N}{M}}
+\end{equation}
+iterazioni, il vettore di stato risulta quasi perfettamente allineato con $\ket{\omega}$, e una misurazione nel base computazionale restituisce la soluzione con alta probabilità.
+
+\subsection*{Rilevanza per la Crittografia}
+
+In ambito crittografico, l'algoritmo di Grover può essere impiegato per condurre attacchi di tipo \textit{brute force} contro cifrari a chiave simmetrica. Un avversario quantistico in grado di eseguire l'algoritmo di Grover riduce infatti la complessità di una ricerca esaustiva sullo spazio delle chiavi da $\mathcal{O}(2^n)$ a $\mathcal{O}(2^{n/2})$. A titolo esemplificativo, mentre un computer classico dovrebbe testare fino a $2^{128}$ combinazioni per violare AES-128, l'algoritmo di Grover riduce lo sforzo computazionale a $\mathcal{O}(2^{64})$ operazioni quantistiche.
+
+Per tale ragione, nell'ottica della transizione verso la crittografia post-quantistica, è ritenuto necessario raddoppiare la lunghezza delle chiavi simmetriche — ad esempio, adottando AES-256 in luogo di AES-128 — al fine di preservare un livello di sicurezza equivalente contro un avversario dotato di capacità quantistiche.%~\cite{nist2016pqc}.
+
 \section{Considerazioni finali}
 
 Riassumendo brevemente, 
@@ -250,5 +345,6 @@ Riassumendo brevemente,
     \item abbiamo introdotto i concetti di meccanica quantistica necessari a comprendere il funzionamento di un computer quantistico;
     \item abbiamo convertito il problema della fattorizzazione in un problema di determinazione del periodo di una funzione esponenziale modulare;
     \item abbiamo poi trovato un algoritmo per calcolarne il perido, e l'abbiamo ottimizzato sostituendo la DFT (che costituiva il contributo con complessità computazionalemnte non polinomiale) con la QFT per ottenere un vantaggio esponenziale rispetto ai metodi classici, permettendo così di risolvere il problema della fattorizzazione in tempo polinomiale su un computer quantistico.
+    \item abbiamo infine introdotto l'algoritmo di Grover, che fornisce un'accelerazione quadratica per problemi di ricerca non strutturata, con implicazioni dirette sulla sicurezza dei sistemi a chiave simmetrica.
 \end{itemize}
-Ora che conosciamo il funzionamento matematico/teorico dell'algoritmo di Shor, possiamo passare alla prossima fare della trattazione: analizzare la risposta della comunità crittografica a questa minaccia: la crittografia post-quantistica.
+Ora che conosciamo il funzionamento matematico/teorico gli algoritmi di Shor e Grover, possiamo passare alla prossima fase della trattazione: analizzare la risposta della comunità crittografica a questa minaccia: la crittografia post-quantistica.
