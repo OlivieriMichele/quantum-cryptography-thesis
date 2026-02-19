@@ -1,0 +1,333 @@
+
+A questo punto della relazione,  abbiamo compreso come funziona la crittografia classica e come i computer quantisci sono in grado di violarla, ora possiamo quindi entrare nel secondo punto fondamentale di questo elaborato: le famiglie di algoritmi (PQC).
+Prima però servirà un ultimo preambolo, visto che abbiamo compreso che l'interra crittografia si basa su problemi matematici, analizziamo in breve quali sono le classi di complessità computazionali dei nuovi problemi matematici che andremo poi ad analizzare per capirne la sicurezza. 
+
+\section*{Introduzione}
+
+\paragraph{Classi di complessità e problemi matematici}
+
+Per comprendere perché la crittografia post-quantistica rappresenta una soluzione efficace, introduciamo la gerarchia delle classi di complessità computazionale per capire dove si collocano i diversi problemi che ci saranno utili in seguito. 
+
+\textbf{Il problema P vs NP}
+Uno dei problemi ancora irrisolti nella matematica e informatica teorica è appunto il problema $P$ vs $NP$, difatti è inserito tra i sette problemi del millennio dal Clay Mathematics Institute\footnote{\href{https://www.claymath.org/millennium/p-vs-np/}{Clay Mathematics Institute}}. 
+La questione riguarda la differenza tra il "risolvere" un problema e il "verificare" una soluzione già data. 
+
+\begin{itemize}
+    \item \textbf{P (Polynomial time)}: Problemi che possono essere risolti in tempo polinomiale da un algoritmo deterministico. Questi problemi sono considerati "facili" da risolvere. Esempio: ordinamento di una lista.
+    \item \textbf{NP (Nondeterministic Polynomial time)}: Problemi per i quali, data una possibile soluzione, è possibile verificare la correttezza in tempo polinomiale. Esempio: il problema del cammino hamiltoniano.
+    \item \textbf{NP-hard}: Problemi almeno tanto difficili quanto i problemi più difficili in NP. Formalmente, un problema è NP-hard se ogni problema in NP può essere ridotto a esso in tempo polinomiale; pertanto, trovare un algoritmo polinomiale per un problema NP-hard implicherebbe che $P = NP$. Esempio: il problema del commesso viaggiatore (TSP).
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{./figures/bqp_graph.png}
+    \caption{Relazione tra le classi di complessità classiche (P, NP, PSPACE) e la classe quantistica BQP.}
+    \label{fig:gerarchia_complessità}
+\end{figure}
+
+Da qui emerge una domanda cruciale: per ogni problema la cui soluzione è facile da verificare (NP) è anche facile trovare una soluzione (P)? Se $P = NP$, allora ogni volta che possiamo controllare rapidamente una soluzione deve esistere anche un modo veloce per trovarla. La comunità scientifica concorda che $P \neq NP$, il che implica che esistono problemi intrinsecamente difficili per i quali trovare la soluzione richiede tempi esponenziali, anche se verificarli è immediato, e questo rappresenta il fondamento della sicurezza crittografica.
+
+\paragraph{BQP}
+Nel caso della nostra analisi, è importante introdurre in questa gerarchia anche la classe BQP (Bounded-error Quantum Polynomial time), che rappresenta l'insieme dei problemi risolvibili efficientemente da un computer quantistico. 
+Attualmente, sebbene non sia dimostrato, la comunità scientifica ritiene che BQP non contenga i problemi NP-hard. In altre parole, si ipotizza che nemmeno un computer quantistico possa risolvere in modo efficiente problemi come il TSP. Questo è fondamentale perché implica che esistono problemi matematici che rimangono difficili da risolvere anche rispetto al calcolo quantistico e che quindi possono essere utilizzati come base per la crittografia post-quantistica.
+In questa classe di problemi (BQP) rientrano infatti RSA e ECC che, come abbiamo visto, sono vulnerabili per via della loro struttura matematica basata sulla periodicità.
+
+\paragraph{PQC}
+La crittografia post-quantistica sposta quindi la sua sicurezza dai problemi di classe NP-Intermediate (di cui si ritiene facciano parte RSA ed ECC) a nuove famiglie matematiche che, allo stato attuale della ricerca, non presentano vulnerabilità esponenziali quantistiche; in particolare, molti di questi schemi sono legati a varianti di problemi NP-hard.
+
+\section{Lattice-baces}
+
+La crittografia basta sui reticoli (Lattice-based)\footnote{\href{https://csrc.nist.gov/pubs/fips/203/final}{NIST FIPS 203: Lattice-Based Cryptography}} è una delle famiglie più promettenti della crittografia post-quantistica. La sua sicurezza si basa sulle proprietà geometriche dei reticoli. Un reticolo è un insieme di punti nello spazio n-dimensionale che possono essere rappresentati come combinazioni lineari di vettori base con coeficenti interi.
+
+\paragraph{Il Problema matematico fondamentale}
+La sicurezza di questa famiglia di algoritmi si basa sulla difficoltà di risolvere problemi specifici all'interno di questi reticoli. Questo è il campo da gioco
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./figures/lattice_2d.png}
+    \caption{Rappresentazione bidimensionale di un reticolo. I punti verdi rappresentano i vettori del reticolo, mentre i vettori blu rappresentano la base del reticolo.}
+    \label{fig:lattice_2d}
+\end{figure}
+
+I principali problemi che ne derivaono sono: 
+
+\subsection{Learning With Errors (LWE)}
+Introdotto da Oded Regev nel 2005, per il quale ha ricevuto il premio Gödel nel 2018, LWE\footnote{\href{https://cims.nyu.edu/~regev/papers/qcrypto.pdf}{LWE}} consiste nel risalire ad un vettore segreto $\mathbf{s} \in \mathbb{Z}_q^n$ dato un insieme di equazioni lineari rumorose.
+
+Formalmente:
+\begin{itemize}
+\item si sceglie una matrice pubblica $\mathbf{A} \in \mathbb{Z}_q^{m \times n}$ con elementi scelti uniformemente a caso
+\item ognuno sceglie un vettore segreto $\mathbf{s} \in \mathbb{Z}_q^n$ (la chiave privata)
+\item e un vettore di errore $\mathbf{e} \in \mathbb{Z}_q^m$ con componenti piccole
+\end{itemize}
+
+Il problema fornisce coppie $(\mathbf{A}, \mathbf{b})$ dove:
+\begin{equation}
+\mathbf{b} = \mathbf{A} \cdot \mathbf{s} + \mathbf{e} \pmod{q}
+\end{equation}
+
+L'obiettivo, come abbiamo anticipato, è recuperare il vettore segreto conoscendo solo $\mathbf{A}$ e $\mathbf{b}$. Non conoscere l'errore  $\mathbf{e}$ rende il problema computazionalmente intrattabile. 
+La difficoltà del problema è stata dimostrato che è correlata alla risoluzione di problemi nel caso pessimo sui reticoli, come come il Shortest Vector Problem (SVP) e il Shortest Independent Vectors Problem (SIVP) classificati come NP-hard.
+Esisitono due versioni del problema: 
+\begin{itemize}
+\item \textbf{Search-LWE}: Trovare il vettore segreto $\mathbf{s}$ dato un insieme di campioni
+\item \textbf{Decision-LWE}: Distinguere campioni LWE $(A, \mathbf{A}\mathbf{s} + \mathbf{e})$ da campioni completamente casuali $(A, \mathbf{u})$ dove $\mathbf{u}$ è uniforme
+\end{itemize}
+È stato dimostrato che le due versioni sono equivalenti, risolvere il problema decisionale consente di risolvere anche quello di ricerca.
+
+\subsection{Module Learning with Errors (MLWE)} 
+
+È una generalizzazione di LWE che opera su strutture chiamate ``moduli'' su anelli polinomiali, tipicamente $R_q = \mathbb{Z}_q[x]/(x^n + 1)$ dove $n$ è una potenza di 2. Questa variante è utilizzata negli standard moderni perché permette una maggiore efficienza computazionale e chiavi di dimensioni significativamente ridotte rispetto al LWE standard.
+
+La formulazione MLWE sostituisce i vettori con vettori di polinomi e le matricrici con matrici di polinomi, mantenendo la stessa struttura generale ma sfruttando la struttura algebrica degli anelli per migliorare le prestazioni. L'equazione diventa:
+\begin{equation}
+\mathbf{t} = \mathbf{A} \cdot \mathbf{s} + \mathbf{e} \pmod{q}
+\end{equation}
+dove ora $\mathbf{A}$, $\mathbf{s}$ e $\mathbf{e}$ sono elementi del modulo su $R_q$.
+
+\subsection{Short Integer Solution (SIS/MSIS)} 
+
+Consiste nel trovare una soluzione ``piccola'' (con coefficienti bassi) per un sistema lineare. Data una matrice $\mathbf{A} \in \mathbb{Z}_q^{m \times n}$, trovare un vettore non nullo $\mathbf{x}$ con norma piccola tale che $\mathbf{A}\mathbf{x} = \mathbf{0} \pmod{q}$. Questo problema è utilizzato principalmente per schemi di firma digitale.
+
+\subsection*{Resistenza agli attacchi quantistici}
+
+I problemi basati sui reticoli (come MLWE e SIS) sono ritenuti difficili da risolvere anche per un avversario dotato di un computer quantistico a tolleranza d'errore. Al momento non sono noti algoritmi quantistici in grado di rompere efficientemente questi schemi. L'algoritmo quantistico di Grover può fornire solo un'accelerazione quadratica nella ricerca, che è significativa ma non sufficiente a rendere il problema trattabile.
+
+La resistenza quantistica deriva dalla natura ``disordinata'' e non strutturata dei problemi sui reticoli, in contrasto con la struttura periodica che caratterizza i problemi di fattorizzazione e logaritmo discreto.
+
+\subsection{Key-Encapsulation Mechanism (KEM)}
+
+Un Key-Encapsulation Mechanism è un insieme di algoritmi che, sotto determinate condizioni, può essere utilizzato da due parti per stabilire una chiave segreta condivisa su un canale pubblico\footnote{\href{https://csrc.nist.gov/pubs/fips/203/final}{NIST FIPS 203: Module-Lattice-Based Key-Encapsulation Mechanism Standard}}. A differenza della crittografia a chiave pubblica tradizionale come RSA, dove un messaggio può essere cifrato direttamente con la chiave pubblica, un KEM è progettato specificamente per lo scambio sicuro di chiavi simmetriche.
+
+Il protocollo KEM basato su MLWE funziona secondo il seguente schema:
+
+\paragraph{Generazione delle chiavi (KeyGen)} Alice genera una coppia di chiavi:
+\begin{enumerate}
+\item Sceglie un vettore segreto $\mathbf{s}$ (piccolo, campionato da una distribuzione di errore)
+\item Genera una matrice pubblica $\mathbf{A}$ (uniforme casuale)
+\item Campiona un vettore di errore $\mathbf{e}$ (piccolo)
+\item Calcola la chiave pubblica: $\mathbf{t} = \mathbf{A}\mathbf{s} + \mathbf{e} \pmod{q}$
+\end{enumerate}
+
+La \textbf{chiave di incapsulamento} (pubblica) è la coppia $(\mathbf{A}, \mathbf{t})$, mentre la \textbf{chiave di decapsulamento} (privata) è $\mathbf{s}$.
+
+\paragraph{Incapsulamento (Encaps)} Bob, ricevuta la chiave pubblica di Alice, vuole stabilire una chiave condivisa:
+\begin{enumerate}
+\item Campiona un nuovo vettore segreto temporaneo $\mathbf{r}$ e vettori di errore $\mathbf{e}_1$, $\mathbf{e}_2$
+\item Calcola il ciphertext: 
+\begin{align}
+\mathbf{u} &= \mathbf{A}^T\mathbf{r} + \mathbf{e}_1 \pmod{q} \\
+v &= \mathbf{t}^T\mathbf{r} + \mathbf{e}_2 + \text{Encode}(K) \pmod{q}
+\end{align}
+dove $K$ è la chiave segreta condivisa (tipicamente 256 bit) codificata opportunamente
+\item Invia il ciphertext $(\mathbf{u}, v)$ ad Alice
+\end{enumerate}
+
+\paragraph{Decapsulamento (Decaps)} Alice, ricevuto il ciphertext da Bob, recupera la chiave condivisa:
+\begin{enumerate}
+\item Calcola: $w = v - \mathbf{s}^T\mathbf{u} \pmod{q}$
+\item Decodifica $w$ per ottenere $K$
+\end{enumerate}
+
+\paragraph{Correttezza del protocollo} La correttezza si basa sul fatto che:
+\begin{align}
+w &= v - \mathbf{s}^T\mathbf{u} \\
+&= (\mathbf{t}^T\mathbf{r} + \mathbf{e}_2 + \text{Encode}(K)) - \mathbf{s}^T(\mathbf{A}^T\mathbf{r} + \mathbf{e}_1) \\
+&= ((\mathbf{A}\mathbf{s} + \mathbf{e})^T\mathbf{r} + \mathbf{e}_2 + \text{Encode}(K)) - \mathbf{s}^T\mathbf{A}^T\mathbf{r} - \mathbf{s}^T\mathbf{e}_1 \\
+&= \mathbf{e}^T\mathbf{r} + \mathbf{e}_2 - \mathbf{s}^T\mathbf{e}_1 + \text{Encode}(K)
+\end{align}
+
+Il termine di errore totale $\mathbf{e}^T\mathbf{r} + \mathbf{e}_2 - \mathbf{s}^T\mathbf{e}_1$ rimane sufficientemente piccolo (perché tutti i vettori coinvolti hanno componenti piccole) da permettere la decodifica corretta di $K$.
+
+\subsubsection{Esempio di Numerico semplificato}
+
+Per chiarire meglio come ML-KEM riesca a trasmettere dati in modo sicuro nonostante la presenza di "rumore" matematico proviamo ad analizzare in concreto l'algoritmo con un esempio numerico semplificato attraversando le tre fasi: generazione delle chiavi, incapsulamento e decapsulamento..
+
+Specifico che in ML-KEM, tutte le operazioni avvengono all'interno di un anello di polinomi con coefficienti nel campo $\mathbb{Z}_q$ dove $q = 3329$. Per semplicità di calcolo, consideriamo un sistema con parametri semplificati:
+
+\begin{itemize}
+    \item Modulo: $q = 17$
+    \item Segreto di Alice ($s$): $3$
+    \item Errore di Alice ($e$): $1$
+    \item Matrice pubblica ($A$): $7$ (nel mondo reale è una matrice, qui un singolo valore)
+\end{itemize}
+
+\paragraph{Fase 1: Generazione delle Chiavi (Alice)}
+Alice prepara la sua chiave pubblica secondo il protocollo ML-KEM:
+
+\begin{enumerate}
+    \item Calcola $t = As + e \pmod{q}$:
+    \begin{align*}
+        t &= (7 \times 3) + 1 = 21 + 1 = 22 \\
+        t &\equiv 5 \pmod{17}
+    \end{align*}
+    
+    \item La \textbf{chiave pubblica} è $(A=7, t=5)$
+    \item La \textbf{chiave privata} è $s=3$
+\end{enumerate}
+
+\paragraph{Fase 2: Incapsulamento (Bob)}
+Bob vuole stabilire una chiave condivisa con Alice inviando il bit $K = 1$.
+
+\begin{enumerate}
+    \item Codifica il messaggio: $\text{Encode}(1) = \lfloor q/2 \rfloor = 8$
+    
+    \item Sceglie parametri casuali:
+    \begin{itemize}
+        \item Numero segreto temporaneo: $r = 2$
+        \item Errori: $e_1 = 1$, $e_2 = 1$
+    \end{itemize}
+    
+    \item Calcola il ciphertext $(u, v)$:
+    \begin{align*}
+        u &= Ar + e_1 = (7 \times 2) + 1 = 14 + 1 = 15 \\
+        v &= tr + e_2 + \text{Encode}(K) \\
+          &= (5 \times 2) + 1 + 8 = 10 + 1 + 8 = 19 \\
+          &\equiv 2 \pmod{17}
+    \end{align*}
+    
+    \item Invia ad Alice il ciphertext: $(u=15, v=2)$
+\end{enumerate}
+
+\paragraph{Fase 3: Decapsulamento (Alice)}
+Alice riceve $(u=15, v=2)$ e usa la sua chiave privata $s=3$ per recuperare il bit originale.
+
+\begin{enumerate}
+    \item Calcola $w = v - su \pmod{q}$:
+    \begin{align*}
+        w &= 2 - (3 \times 15) \pmod{17} \\
+          &= 2 - 45 \pmod{17} \\
+          &= -43 \pmod{17} \\
+          &= 8 \pmod{17}
+    \end{align*}
+    
+    \item Decodifica $w$: Alice applica la funzione di decodifica confrontando $w=8$ con i valori attesi $0$ e $\lfloor q/2 \rfloor = 8$. Poiché $w$ corrisponde esattamente a $\text{Encode}(1) = 8$, la decodifica restituisce $K=1$.
+\end{enumerate}
+
+La chiave condivisa $K=1$ è stata trasmessa con successo!
+
+\paragraph{Analisi della Correttezza}
+Per comprendere perché il protocollo funziona, espandiamo il calcolo di Alice sostituendo $t = As + e$:
+
+\begin{align*}
+    w &= v - su \\
+  &= (tr + e_2 + \text{Encode}(K)) - s(Ar + e_1) \\
+  &= (As+e)r + e_2 + \text{Encode}(K) - sAr - se_1 \\
+  &= \text{Encode}(K) + \underbrace{(er + e_2 - se_1)}_{\text{Rumore Totale}}
+\end{align*}
+
+Verifichiamo il rumore totale nel nostro esempio:
+\begin{align*}
+\text{Rumore} &= er + e_2 - se_1 \\
+              &= (1 \times 2) + 1 - (3 \times 1) \\
+              &= 2 + 1 - 3 = 0
+\end{align*}
+
+Nel nostro esempio il rumore si è annullato perfettamente, producendo $w = 8 + 0 = 8$. Nella realtà, i parametri $e, r, e_1, e_2$ sono scelti da distribuzioni binomiali centrate che garantiscono che il rumore totale rimanga sempre al di sotto di una soglia critica (tipicamente $< q/4$), permettendo ad Alice di decodificare correttamente il bit anche in presenza di piccole perturbazioni.
+
+\paragraph{Gestione del Rumore e Affidabilità}
+Se il rumore fosse stato diverso da zero, ad esempio $+2$, Alice avrebbe ottenuto $w = 10$ invece di $8$. Applicando la funzione di decodifica:
+$$\text{Bit} = \left\lfloor \frac{2 \cdot 10}{17} \right\rceil \pmod{2} = \lfloor 1.17 \rceil = 1$$
+
+Il sistema sarebbe comunque riuscito a recuperare correttamente il bit grazie al margine di tolleranza integrato nel design. Solo se il rumore superasse la soglia di $q/4 \approx 4.25$ si verificherebbe un errore di decodifica (\emph{decapsulation failure}).
+\newpage
+
+\paragraph{Parametri Reali e Considerazioni Implementative}
+Nei sistemi ML-KEM reali (FIPS 203):
+\begin{itemize}
+    \item Il modulo è $q = 3329$
+    \item $A$ è una matrice di polinomi di grado 255
+    \item $s, e, r, e_1, e_2$ sono vettori di polinomi campionati da distribuzioni binomiali centrate
+    \item Il valore per il bit $1$ è $\text{Encode}(1) = 1665$
+    \item Il rumore è progettato per rimanere molto al di sotto della soglia critica $q/4 \approx 832$
+    \item La probabilità di \emph{decapsulation failure} per ML-KEM-768 è circa $2^{-164.8}$
+    \item Per velocizzare le moltiplicazioni polinomiali (come $s^T u$) si utilizza la Number-Theoretic Transform (NTT), riducendo la complessità da $O(n^2)$ a $O(n \log n)$
+    \item Lo schema utilizza la trasformata di Fujisaki-Okamoto per raggiungere la sicurezza IND-CCA2
+\end{itemize}
+
+\paragraph{Sicurezza} Un attaccante che intercetta $(\mathbf{A}, \mathbf{t})$ e $(\mathbf{u}, v)$ deve quindi riuscire a risolvere il problema MLWE per recuperare $K$, che è computazionalmente intrattabile. La chiave segreta condivisa può poi essere utilizzata con algoritmi crittografici simmetrici (come AES) per cifrare e autenticare le comunicazioni.
+
+\subsection*{Firme Digitali basate su reticoli}
+
+Le firme digitali sono utilizzate per autenticare l'identità e l'integrità dei dati. Inoltre, il destinatario di dati firmati può utilizzare una firma digitale come prova per dimostrare a terzi che la firma è stata effettivamente generata dal firmatario dichiarato (proprietà di non ripudio)\footnote{\href{https://csrc.nist.gov/pubs/fips/204/final}{NIST FIPS 204: Module-Lattice-Based Digital Signature Standard}}.
+
+Gli schemi di firma basati su reticoli utilizzano tipicamente il problema SIS/MSIS come fondamento della loro sicurezza.
+
+\subsection*{Stato della standardizzazione}
+
+Il NIST (National Institute of Standards and Technology) ha avviato un processo di standardizzazione della crittografia post-quantistica nel 2016\footnote{\href{https://csrc.nist.gov/projects/post-quantum-cryptography}{NIST: Post-Quantum Cryptography Standardization}}. Il 13 agosto 2024 sono stati pubblicati i primi standard finali basati sui reticoli\footnote{\href{https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards}{NIST: NIST Releases First 3 Finalized Post-Quantum Encryption Standards}}:
+
+\begin{itemize}
+\item \textbf{FIPS 203 (ML-KEM)}: Basato sull'algoritmo CRYSTALS-Kyber, è lo standard primario per lo scambio di chiavi. ML-KEM è l'acronimo di Module-Lattice-Based Key-Encapsulation Mechanism. La sicurezza di ML-KEM è correlata alla difficoltà computazionale del problema Module Learning with Errors. Attualmente si ritiene che ML-KEM sia sicuro anche contro avversari in possesso di un computer quantistico.
+
+\item \textbf{FIPS 204 (ML-DSA)}: Basato su CRYSTALS-Dilithium, è lo standard primario per le firme digitali. ML-DSA è l'acronimo di Module-Lattice-Based Digital Signature Algorithm. Si ritiene che ML-DSA sia sicuro anche contro avversari in possesso di un computer quantistico su larga scala.
+
+\item \textbf{FIPS 206 (FN-DSA)}: Basato sull'algoritmo FALCON, è un ulteriore standard per firme digitali attualmente in fase di standardizzazione finale. FN-DSA è l'acronimo di FFT (Fast-Fourier Transform) over NTRU-Lattice-Based Digital Signature Algorithm\footnote{\href{https://csrc.nist.gov/presentations/2025/fips-206-fn-dsa-falcon}{NIST: FIPS 206 FN-DSA (FALCON)}}. FALCON utilizza reticoli NTRU e, a differenza degli altri algoritmi selezionati, si basa sull'aritmetica in virgola mobile. Offre firme molto compatte e prestazioni elevate, rendendolo particolarmente adatto a scenari in cui la larghezza di banda è limitata o la velocità è critica.
+\end{itemize}
+
+Gli standard possono e devono essere messi in uso ora. Le organizzazioni sono incoraggiate a iniziare la migrazione verso questi sistemi per proteggersi dalla futura minaccia quantistica.
+
+\subsection*{Parametri e livelli di sicurezza}
+
+All'interno degli standard esistono diversi set di parametri che offrono compromessi tra sicurezza e prestazioni:
+
+\paragraph{ML-KEM (ex CRYSTALS-Kyber)} Questo standard specifica tre set di parametri per ML-KEM. In ordine di crescente forza di sicurezza e decrescente prestazione, questi sono ML-KEM-512, ML-KEM-768 e ML-KEM-1024:
+
+\begin{itemize}
+\item \textbf{ML-KEM-512}: Livello di sicurezza Categoria 1 (equivalente a AES-128), chiave di incapsulamento di 800 bytes, chiave di decapsulamento di 1632 bytes, ciphertext di 768 bytes.
+\item \textbf{ML-KEM-768}: Livello di sicurezza Categoria 3 (equivalente a AES-192), raccomandato come default dal NIST. Chiave di incapsulamento di 1184 bytes, chiave di decapsulamento di 2400 bytes, ciphertext di 1088 bytes. Offre un ottimo equilibrio tra sicurezza e velocità.
+\item \textbf{ML-KEM-1024}: Livello di sicurezza Categoria 5 (equivalente a AES-256), massima sicurezza. Chiave di incapsulamento di 1568 bytes, chiave di decapsulamento di 3168 bytes, ciphertext di 1568 bytes. Prestazioni ridotte e chiavi più grandi.
+\end{itemize}
+
+Tutti e tre i set di parametri producono una chiave segreta condivisa di 32 bytes (256 bit).
+
+\paragraph{ML-DSA (ex CRYSTALS-Dilithium)} Esistono tre versioni: ML-DSA-44, ML-DSA-65 e ML-DSA-87, dove i numeri si riferiscono alle dimensioni della matrice utilizzata nell'algoritmo (rispettivamente matrici $4 \times 4$, $6 \times 5$ e $8 \times 7$), corrispondenti a diversi livelli di sicurezza (rispettivamente Categorie 2, 3 e 5).
+
+\paragraph{Algoritmi alternativi} Esistono anche altri algoritmi basati sui reticoli che non sono stati selezionati come standard primari ma che sono serviti come candidati o alternative, come NTRU, SABER e FrodoKEM. Ad esempio, NTRU è basato su problemi di reticoli ma con una struttura matematica differente che lo rende una potenziale alternativa in caso di vulnerabilità scoperte in ML-KEM.
+
+\section{Code-based Cryptography}
+
+La crittografia basata sui codici rappresenta una delle famiglie più consolidate della crittografia post-quantistica, introdotta da Robert McEliece nel 1978. La sicurezza si basa sul \textbf{Syndrome Decoding Problem (SDP)}, un problema NP-hard\footnote{\href{https://classic.mceliece.org/nist/mceliece-20201010.pdf}{Classic McEliece: conservative code-based cryptography}} che consiste nel trovare un vettore di errore $e$ di peso limitato tale che $He^T = s$, data una matrice di controllo $H$ e un vettore sindrome $s$.
+
+\subsection{Classic McEliece}
+
+Classic McEliece è l'algoritmo più antico tra i candidati PQC\footnote{\href{https://classic.mceliece.org/}{Classic McEliece: Official Website}}, con 46 anni di resistenza alla crittanalisi. Utilizza codici di Goppa binari e offre sicurezza conservativa estremamente stabile. Lo svantaggio principale sono le chiavi pubbliche molto grandi (261 KB - 1.3 MB). Non è stato selezionato per la standardizzazione NIST, ma potrebbe essere considerato basandosi sulla futura standardizzazione ISO\footnote{\href{https://nvlpubs.nist.gov/nistpubs/ir/2025/NIST.IR.8545.pdf}{NIST IR 8545: Status Report on the Fourth Round}}.
+
+\subsection{HQC (Hamming Quasi-Cyclic)}
+
+HQC è stato selezionato dal NIST nel marzo 2025 come quinto algoritmo per la standardizzazione PQC\footnote{\href{https://www.nist.gov/news-events/news/2025/03/nist-selects-hamming-quasi-cyclic-hqc-algorithm-post-quantum-encryption}{NIST Selects Hamming Quasi-Cyclic (HQC) Algorithm}}, per servire come backup a ML-KEM. La sicurezza si basa sul problema \textbf{Quasi-Cyclic Syndrome Decoding (QCSD)}. Utilizza codici quasi-ciclici che permettono chiavi pubbliche molto più piccole (2-4 KB) rispetto a Classic McEliece. È stato scelto per la diversità crittografica, l'analisi di sicurezza stabile e il tasso di fallimento della decodifica ben compreso\footnote{\href{https://nvlpubs.nist.gov/nistpubs/ir/2025/NIST.IR.8545.pdf}{NIST IR 8545: Status Report on the Fourth Round}}. Standard finale atteso entro il 2027.
+
+\newpage
+
+\section{Hash-based Cryptography}
+
+\subsection{SLH-DSA (SPHINCS+)}
+
+SLH-DSA è uno standard finale NIST pubblicato il 13 agosto 2024 come FIPS 205\footnote{\href{https://csrc.nist.gov/pubs/fips/205/final}{NIST FIPS 205: Stateless Hash-Based Digital Signature Standard}}. È ``stateless'', eliminando vulnerabilità legate alla gestione dello stato. La sicurezza si basa sulla resistenza alle preimmagini e collisioni delle funzioni hash.
+
+La costruzione combina WOTS+ (firma one-time), FORS (firma few-time) e alberi di Merkle organizzati in hypertree. FIPS 205 specifica 12 set di parametri su tre livelli di sicurezza, ottimizzati per dimensione firme (``s'', 17-50 KB) o velocità (``f''). 
+
+È particolarmente adatto per firma di codice, sistemi con limitazioni di memoria per chiavi pubbliche (32-64 bytes) e scenari dove la massima sicurezza è prioritaria. Non è inteso come sostituto generale per protocolli come TLS.
+
+\section{Multivariate Cryptography}
+
+La crittografia multivariata si basa sul \textbf{Multivariate Quadratic (MQ) Problem}: risolvere sistemi di equazioni polinomiali quadratiche multivariate su campi finiti, un problema NP-hard.
+
+\subsection{Rainbow}
+
+Rainbow era un finalista del Round 3 NIST basato sulla costruzione Unbalanced Oil and Vinegar. Offriva firme molto piccole (66 bytes) e operazioni estremamente efficienti. Tuttavia, nel 2022 Ward Beullens ha pubblicato un attacco che ha recuperato la chiave segreta in circa 53 ore su un laptop standard per i parametri SL1\footnote{\href{https://eprint.iacr.org/2022/214}{Breaking Rainbow Takes a Weekend on a Laptop}}. L'attacco sfrutta proprietà strutturali del polinomio pubblico, portando al ritiro di Rainbow dalla standardizzazione. Questo caso dimostra l'importanza dell'analisi crittografica continua e del processo di standardizzazione NIST.
+\newpage
+
+\section{Isogeny-based Cryptography}
+
+La crittografia basata su isogenie utilizza mappature tra curve ellittiche supersingolari che preservano la struttura del gruppo.
+
+\subsection{SIKE e il suo fallimento}
+
+SIKE era un candidato del Round 4 basato su SIDH\footnote{\href{https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/round-4/submissions/SIKE-spec.pdf}{SIKE Specification}}, con chiavi pubbliche molto piccole (2688 bit a 128-bit di sicurezza quantistica) e perfect forward secrecy.
+
+Nel luglio 2022, Castryck e Decru hanno pubblicato un attacco che ha completamente compromesso SIKE\footnote{\href{https://nvlpubs.nist.gov/nistpubs/ir/2025/NIST.IR.8545.pdf}{NIST IR 8545: Status Report on the Fourth Round}}, violando tutti i parametri in poche ore su un singolo core CPU (SIKEp434 in 1 ora, SIKEp751 in 21 ore). L'attacco sfrutta i punti ausiliari delle curve ellittiche nelle chiavi pubbliche SIDH. NIST ha rimosso SIKE dalla considerazione nell'agosto 2022.
+
+\subsection{Lo stato attuale}
+
+Altri sistemi basati su isogenie rimangono sicuri: CSIDH (non affetto dagli attacchi Castryck-Decru), SQIsign (schema di firma) e QFESTA (sviluppato da NTT nel 2024, attualmente il più efficiente computazionalmente). Non esistono riduzioni di sicurezza a problemi NP-hard noti, rendendo questa famiglia oggetto di studi cauti. Il caso SIKE dimostra i benefici del processo di standardizzazione NIST nell'identificare vulnerabilità prima della distribuzione.
