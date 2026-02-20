@@ -314,6 +314,41 @@ La migrazione verso la crittografia post-quantistica rappresenta una delle sfide
 \input{capitolo5}
 
 %----------------------------------------------------------------------------------------
+
+\chapter{Considerazioni finali}
+\label{chap:Considerazioni finali}
+%----------------------------------------------------------------------------------------
+
+\section{Stato attuale dei computer quantistici}
+
+Un computer quantistico reale è un sistema fisico composto da qubit che devono mantenere le loro proprietà quantistiche per tutta la durata del calcolo. Le tecnologie attualmente più diffuse si basano su qubit superconduttori, che operano a temperature estremamente basse, prossime allo zero assoluto, tipicamente dell'ordine di alcune decine di millikelvin, al fine di ridurre il rumore termico e preservare la coerenza quantistica~\cite{krantz2019quantum}.
+
+Il raggiungimento di tali condizioni richiede l'utilizzo di refrigeratori a diluizione, dispositivi complessi e costosi che rappresentano un primo limite alla scalabilità dei sistemi. Anche minime interferenze ambientali possono causare la \emph{decoerenza}, ovvero la perdita delle proprietà quantistiche dei qubit, compromettendo la correttezza del calcolo.
+
+Un'ulteriore difficoltà riguarda il controllo delle operazioni quantistiche. Le porte devono essere applicate con estrema precisione, poiché errori anche molto piccoli tendono ad accumularsi rapidamente con l'aumentare del numero di qubit e della profondità del circuito.
+
+Per mitigare questo problema si ricorre a tecniche di \emph{correzione d'errore quantistica}. Tuttavia, gli schemi attualmente noti richiedono l'impiego di un numero elevato di qubit fisici per realizzare un singolo qubit logico affidabile, tipicamente dell'ordine di centinaia o migliaia~\cite{preskill2018quantum}.
+
+A causa dei limiti tecnologici attuali, in particolare dei tempi di coerenza ridotti e dell'elevato tasso di errore, l'esecuzione di algoritmi quantistici complessi su larga scala, come quelli necessari per rompere RSA a 2048 bit, non è ancora praticabile. Le stime più ottimistiche suggeriscono che potrebbero essere necessari dai 10 ai 20 anni prima che computer quantistici sufficientemente potenti diventino disponibili~\cite{mosca2018cybersecurity}.
+
+\section{Stato attuale della crittografia post-quantistica}
+
+Il processo di standardizzazione del NIST, iniziato nel 2016, ha portato alla selezione di diversi algoritmi post-quantistici nel 2022~\cite{alagic2022nist}. Tra questi, CRYSTALS-Kyber per lo scambio di chiavi e CRYSTALS-Dilithium per le firme digitali rappresentano i candidati principali per la sostituzione di RSA ed ECC.
+
+Nonostante la disponibilità di questi standard, la transizione verso la crittografia post-quantistica presenta sfide significative. Molti algoritmi PQC richiedono chiavi più grandi e operazioni più costose rispetto ai loro equivalenti classici, il che può comportare problemi di compatibilità con l'infrastruttura esistente e impatti sulle prestazioni.
+
+Per mitigare i rischi durante la fase di transizione, molte organizzazioni stanno adottando un approccio di \emph{crittografia ibrida}, combinando un algoritmo classico con uno post-quantistico~\cite{bindel2019transitioning}. Questo approccio garantisce sicurezza anche nel caso in cui uno dei due algoritmi si rivelasse vulnerabile in futuro. Implementazioni di questo tipo sono già state annunciate da grandi aziende tecnologiche come Apple (con il protocollo PQ3) e Google (con il supporto per algoritmi ibridi in Chrome).
+
+\section{Prospettive future}
+
+La minaccia quantistica alla crittografia classica, sebbene non immediata, è sufficientemente concreta da richiedere azioni preventive. Il concetto di ``\emph{harvest now, decrypt later}'' evidenzia come dati cifrati oggi potrebbero essere vulnerabili in futuro, rendendo urgente la protezione delle informazioni sensibili a lungo termine~\cite{mosca2018cybersecurity}.
+
+L'adozione della crittografia post-quantistica non rappresenta semplicemente una sostituzione tecnica di algoritmi, ma un processo di trasformazione dell'intera infrastruttura di sicurezza digitale. La collaborazione tra enti di standardizzazione, comunità accademica e industria sarà fondamentale per garantire una transizione efficace e tempestiva verso sistemi crittografici resistenti al calcolo quantistico.
+
+In conclusione, mentre i computer quantistici rimangono una sfida ingegneristica significativa, la crittografia post-quantistica si sta rapidamente evolvendo da teoria accademica a realtà implementativa. La finestra temporale per completare la transizione prima che computer quantistici sufficientemente potenti diventino disponibili è limitata, ma i progressi attuali nella standardizzazione e nell'implementazione di algoritmi PQC offrono motivi di ottimismo per la sicurezza digitale futura.
+
+
+%----------------------------------------------------------------------------------------
 % BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
