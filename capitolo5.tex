@@ -285,6 +285,97 @@ Tutti e tre i set di parametri producono una chiave segreta condivisa di 32 byte
 
 \paragraph{Algoritmi alternativi} Esistono anche altri algoritmi basati sui reticoli che non sono stati selezionati come standard primari ma che sono serviti come candidati o alternative, come NTRU, SABER e FrodoKEM. Ad esempio, NTRU è basato su problemi di reticoli ma con una struttura matematica differente che lo rende una potenziale alternativa in caso di vulnerabilità scoperte in ML-KEM.
 
+\section{Hash-based Cryptography}
+
+Fin'ora abbiamo parlato principalmente di crittografia a chiave pubblica per la riservatezza e cifratura, ma la crittografia ha anche un ruolo fondamentale nell'\textbf{autenticità} e \textbf{integrità} dei dati.
+
+La firma digitale è il concetto che risolve entrambi i problemi. 
+L'idea di fondo è elegante: si usa una funzione matematica che lega in modo indissolubile 
+il contenuto del documento alla chiave privata del mittente, producendo qualcosa che 
+chiunque può verificare con la corrispondente chiave pubblica, ma che solo il mittente 
+può produrre. Nello scenario classico questo concetto era interconnesso con la crittografia a chiave pubblica, 
+ma con l'avvento della minaccia quantistica è diventato necessario ripensare completamente questo paradigma.
+
+Per comprendere i nuovi standard in questo ambito, è fondamentale partire dal concetto 
+di \textit{funzione hash crittografica}. Si tratta di un algoritmo che prende un messaggio 
+di lunghezza variabile e produce un \textit{digest} (o impronta) di lunghezza fissa, con 
+le seguenti proprietà fondamentali \cite{fips205, slides_sha}:
+\begin{itemize}
+    \item \textbf{Determinismo}: lo stesso input produce sempre lo stesso output.
+    \item \textbf{Efficienza}: il calcolo di $H(x)$ è computazionalmente veloce.
+    \item \textbf{Resistenza alla preimmagine}: dato $y$, è computazionalmente impossibile 
+    trovare $x$ tale che $H(x) = y$.
+    \item \textbf{Resistenza alla seconda preimmagine}: dato $x$, è impossibile trovare 
+    $x' \neq x$ tale che $H(x') = H(x)$.
+    \item \textbf{Resistenza alle collisioni}: è impossibile trovare una qualsiasi coppia 
+    $(x, x')$ con $x \neq x'$ tale che $H(x) = H(x')$.
+\end{itemize}
+
+Un esempio concreto illustra l'importanza di queste proprietà. Applicando SHA-256:
+\begin{verbatim}
+Input:  "Pago Mario 100€"   →   SHA-256: a3f1d8c2...
+Input:  "Pago Mario 101€"   →   SHA-256: 7b29e4a1...
+\end{verbatim}
+Cambiare anche un solo carattere nell'input produce un output completamente diverso: 
+questo fenomeno è noto come \textit{effetto valanga}, ed è ciò che rende le funzioni 
+hash utili per rilevare qualsiasi manomissione di un documento.
+
+Strettamente legati a queste funzioni sono i \textit{MAC} (Message Authentication Code), 
+strumenti utilizzati nel contesto della crittografia simmetrica per garantire che un 
+messaggio sia autentico e non sia stato manipolato durante la trasmissione \cite{bellare_rogaway}.
+
+\subsection*{Come funziona una firma digitale classica}
+
+Lo schema classico di firma digitale (RSA, ECDSA) si articola in tre fasi. Nella prima 
+fase di \textbf{generazione delle chiavi}, il firmatario dispone di una coppia 
+$(sk, pk)$ — chiave privata e pubblica — legate matematicamente: con RSA.
+
+Nella fase di \textbf{firma}, il mittente non firma direttamente il messaggio $M$ 
+(che potrebbe essere di dimensione arbitraria), ma il suo digest:
+\[
+M \;\longrightarrow\; h = H(M) \;\longrightarrow\; \sigma = sk(h)
+\]
+Il digest viene quindi cifrato con la chiave privata, producendo la firma $\sigma$.
+
+Nella fase di \textbf{verifica}, il destinatario, in possesso della chiave pubblica $pk$, 
+riceve la coppia $(M, \sigma)$, calcola autonomamente $h = H(M)$, decifra $\sigma$ 
+ottenendo $h'$, e accetta la firma come valida se e solo se $h = h'$. La correttezza 
+dello schema si basa sul fatto che solo chi possiede $sk$ può produrre una firma 
+$\sigma$ tale che $pk(\sigma) = H(M)$, e che la resistenza alle collisioni di $H$ 
+impedisce di trovare un messaggio alternativo $M'$ con lo stesso digest — rendendo 
+impossibile alterare il documento mantenendo la firma valida.
+
+\subsection*{La minaccia quantistica e la strategia del NIST}
+
+Come abbiamo ampiamente discusso, RSA e ECDSA sono vulnerabili agli attacchi quantistici, pertanto
+non sono più considerati sicuri per la firma digitale in un mondo post-quantistico.
+
+Le funzioni hash risultano invece più resistenti alla minaccia quantistica. Il miglior 
+attacco noto in questo contesto è l'algoritmo di Grover, che riduce la complessità 
+di una ricerca esaustiva da $O(2^n)$ a $O(2^{n/2})$: SHA-256, che offre 256 bit di 
+sicurezza classica, scende a 128 bit di sicurezza quantistica — un livello comunque 
+adeguato ricorrendo a funzioni con output sufficientemente lungo (ad esempio SHA-512, 
+o varianti con 256 bit di sicurezza quantistica).
+
+Nel panorama della crittografia post-quantistica (PQC), affidarsi a protocolli classici 
+come RSA non è dunque più sicuro. D'altra parte, sebbene la crittografia basata sui 
+reticoli rappresenti oggi la soluzione principale, il NIST ha adottato una strategia 
+di \textit{diversificazione} \cite{nist_ir8413}. L'obiettivo è mitigare il rischio che, 
+in futuro, possano essere scoperte vulnerabilità specifiche nei problemi computazionali 
+legati ai reticoli; per questo motivo, è stato standardizzato un protocollo che si basa 
+esclusivamente sulla robustezza delle funzioni hash, senza appoggiarsi ad altri 
+costrutti a chiave pubblica per la firma e la verifica dei messaggi \cite{fips205}.
+
+\newpage
+
+\subsection{SLH-DSA (SPHINCS+)}
+
+SLH-DSA è uno standard finale NIST pubblicato il 13 agosto 2024 come FIPS 205\footnote{\href{https://csrc.nist.gov/pubs/fips/205/final}{NIST FIPS 205: Stateless Hash-Based Digital Signature Standard}}. È ``stateless'', eliminando vulnerabilità legate alla gestione dello stato. La sicurezza si basa sulla resistenza alle preimmagini e collisioni delle funzioni hash.
+
+La costruzione combina WOTS+ (firma one-time), FORS (firma few-time) e alberi di Merkle organizzati in hypertree. FIPS 205 specifica 12 set di parametri su tre livelli di sicurezza, ottimizzati per dimensione firme (``s'', 17-50 KB) o velocità (``f''). 
+
+È particolarmente adatto per firma di codice, sistemi con limitazioni di memoria per chiavi pubbliche (32-64 bytes) e scenari dove la massima sicurezza è prioritaria. Non è inteso come sostituto generale per protocolli come TLS.
+
 \section{Code-based Cryptography}
 
 La crittografia basata sui codici rappresenta una delle famiglie più consolidate della crittografia post-quantistica, introdotta da Robert McEliece nel 1978. La sicurezza si basa sul \textbf{Syndrome Decoding Problem (SDP)}, un problema NP-hard\footnote{\href{https://classic.mceliece.org/nist/mceliece-20201010.pdf}{Classic McEliece: conservative code-based cryptography}} che consiste nel trovare un vettore di errore $e$ di peso limitato tale che $He^T = s$, data una matrice di controllo $H$ e un vettore sindrome $s$.
@@ -298,16 +389,6 @@ Classic McEliece è l'algoritmo più antico tra i candidati PQC\footnote{\href{h
 HQC è stato selezionato dal NIST nel marzo 2025 come quinto algoritmo per la standardizzazione PQC\footnote{\href{https://www.nist.gov/news-events/news/2025/03/nist-selects-hamming-quasi-cyclic-hqc-algorithm-post-quantum-encryption}{NIST Selects Hamming Quasi-Cyclic (HQC) Algorithm}}, per servire come backup a ML-KEM. La sicurezza si basa sul problema \textbf{Quasi-Cyclic Syndrome Decoding (QCSD)}. Utilizza codici quasi-ciclici che permettono chiavi pubbliche molto più piccole (2-4 KB) rispetto a Classic McEliece. È stato scelto per la diversità crittografica, l'analisi di sicurezza stabile e il tasso di fallimento della decodifica ben compreso\footnote{\href{https://nvlpubs.nist.gov/nistpubs/ir/2025/NIST.IR.8545.pdf}{NIST IR 8545: Status Report on the Fourth Round}}. Standard finale atteso entro il 2027.
 
 \newpage
-
-\section{Hash-based Cryptography}
-
-\subsection{SLH-DSA (SPHINCS+)}
-
-SLH-DSA è uno standard finale NIST pubblicato il 13 agosto 2024 come FIPS 205\footnote{\href{https://csrc.nist.gov/pubs/fips/205/final}{NIST FIPS 205: Stateless Hash-Based Digital Signature Standard}}. È ``stateless'', eliminando vulnerabilità legate alla gestione dello stato. La sicurezza si basa sulla resistenza alle preimmagini e collisioni delle funzioni hash.
-
-La costruzione combina WOTS+ (firma one-time), FORS (firma few-time) e alberi di Merkle organizzati in hypertree. FIPS 205 specifica 12 set di parametri su tre livelli di sicurezza, ottimizzati per dimensione firme (``s'', 17-50 KB) o velocità (``f''). 
-
-È particolarmente adatto per firma di codice, sistemi con limitazioni di memoria per chiavi pubbliche (32-64 bytes) e scenari dove la massima sicurezza è prioritaria. Non è inteso come sostituto generale per protocolli come TLS.
 
 \section{Multivariate Cryptography}
 
