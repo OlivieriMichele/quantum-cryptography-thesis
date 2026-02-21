@@ -439,15 +439,14 @@ bellare_rogaway}.
 Si generano $2^h$ coppie di chiavi OTS. Le chiavi pubbliche vengono messe nelle foglie dell'albero; ogni nodo interno è l'hash della
 concatenazione dei suoi due figli. La radice è l'unica chiave pubblica globale:
 
-\begin{verbatim}
-             Root  (pk globale)
-            /          \
-      H(n0,n1)       H(n2,n3)
-       /    \          /    \
-      n0    n1        n2    n3
-      ↑      ↑         ↑      ↑
-   OTS_0  OTS_1     OTS_2  OTS_3
-\end{verbatim}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./figures/merkle_tree.png}
+    \caption{Struttura di un albero di Merkle con 8 foglie $K_0, \ldots, K_7$.
+             Ogni nodo interno $n_{i,j}$ è l'hash della concatenazione dei suoi
+             due figli; la radice $n_{3,0}$ costituisce la chiave pubblica globale.}
+    \label{fig:merkle_tree}
+\end{figure}
 
 \paragraph{Firma e verifica.}
 Per firmare l'\mbox{$i$-esimo} messaggio si usa la coppia OTS numero $i$ e si allega il \textit{percorso di autenticazione}, ovvero i nodi fratelli
@@ -502,8 +501,21 @@ Ad esempio, nella variante \texttt{SLH-DSA-SHA2-128s} (sicurezza a 128 bit):
     n = 16\text{ byte},\quad
     h = 63\text{ (altezza totale)},\quad
     d = 7\text{ livelli},\quad
+\]
+\[
     h' = h/d = 9\text{ (altezza del sottoalbero)}.
 \]
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.60\textwidth]{./figures/slhdsa_hypertree.png}
+    \caption{Architettura ipertree di SLH-DSA con $d = 3$ livelli. Gli alberi
+             di Merkle ai livelli superiori firmano tramite WOTS\textsuperscript{+}
+             le radici degli alberi al livello inferiore. Al livello~0, la firma
+             WOTS\textsuperscript{+} autentica la chiave pubblica FORS, che a sua
+             volta firma il messaggio.}
+    \label{fig:slhdsa_hypertree}
+\end{figure}
 
 \paragraph{Generazione deterministica tramite PRF.}
 Il segreto alla base dello schema stateless è che tutte le chiavi OTS e
@@ -604,9 +616,11 @@ come segue:
 \[
     \;\to\; \text{SLH-DSA (stateless)}.
 \]
-In ogni passo la sicurezza si basa esclusivamente sulla difficoltà di
-invertire funzioni hash, senza dipendere da strutture algebriche che
-l'algoritmo di Shor potrebbe sfruttare \cite{fips205, bellare_rogaway}.
+In ogni passo la sicurezza si basa esclusivamente sulla difficoltà di invertire funzioni hash, senza dipendere da strutture algebriche che
+l'algoritmo di Shor potrebbe sfruttare, motivo per cui il NIST considera SLH-DSA un backup fondamentale. 
+Se un domani venisse scoperto un attacco matematico imprevisto contro i reticoli (che alimentano ML-DSA), gli algoritmi hash-based 
+rimarrebbero quasi certamente sicuri, poiché la loro matematica è radicalmente differente e molto più semplice. Tuttavia, 
+sono meno efficienti dei reticoli: le firme sono generalmente più grandi e il processo di firma è più lento. \cite{fips205, bellare_rogaway}.
 
 \section{Code-based Cryptography}
 
