@@ -1,4 +1,3 @@
-
 A questo punto della relazione,  abbiamo compreso come funziona la crittografia classica e come i computer quantisci sono in grado di violarla, ora possiamo quindi entrare nel secondo punto fondamentale di questo elaborato: le famiglie di algoritmi (PQC).
 Prima però servirà un ultimo preambolo, visto che abbiamo compreso che l'interra crittografia si basa su problemi matematici, analizziamo in breve quali sono le classi di complessità computazionali dei nuovi problemi matematici che andremo poi ad analizzare per capirne la sicurezza. 
 
@@ -370,11 +369,244 @@ costrutti a chiave pubblica per la firma e la verifica dei messaggi \cite{fips20
 
 \subsection{SLH-DSA (SPHINCS+)}
 
-SLH-DSA è uno standard finale NIST pubblicato il 13 agosto 2024 come FIPS 205\footnote{\href{https://csrc.nist.gov/pubs/fips/205/final}{NIST FIPS 205: Stateless Hash-Based Digital Signature Standard}}. È ``stateless'', eliminando vulnerabilità legate alla gestione dello stato. La sicurezza si basa sulla resistenza alle preimmagini e collisioni delle funzioni hash.
+La risposta del nist è 'algoritmo SLH-DSA (standardizzato nel FIPS 205 e basato su SPHINCS+)
+rappresenta il culmine di decenni di evoluzione nella crittografia basata
+su hash. Per comprenderlo, è utile ripercorrere i passaggi logici che hanno
+portato da semplici firme per un singolo bit a una struttura complessa e
+\textit{stateless} \cite{fips205}.
 
-La costruzione combina WOTS+ (firma one-time), FORS (firma few-time) e alberi di Merkle organizzati in hypertree. FIPS 205 specifica 12 set di parametri su tre livelli di sicurezza, ottimizzati per dimensione firme (``s'', 17-50 KB) o velocità (``f''). 
+\subsubsection{Firme One-Time: lo schema di Lamport (1979)}
 
-È particolarmente adatto per firma di codice, sistemi con limitazioni di memoria per chiavi pubbliche (32-64 bytes) e scenari dove la massima sicurezza è prioritaria. Non è inteso come sostituto generale per protocolli come TLS.
+Il punto di partenza è lo schema \textit{One-Time Signature} (OTS) di Lamport. L'idea è semplicissima: la
+sicurezza non deriva da problemi matematici complessi come la fattorizzazione, ma esclusivamente dall'unidirezionalità delle funzioni hash.
+
+\paragraph{Caso base: firmare 1 bit.}
+Il firmatario sceglie due stringhe casuali segrete $x_0, x_1 \in \{0,1\}^n$ e pubblica i loro hash come chiave pubblica:
+\[
+    pk = \bigl(H(x_0),\; H(x_1)\bigr).
+\]
+Per firmare un bit $b \in \{0,1\}$, rivela semplicemente $x_b$. Il verificatore controlla che $H(x_b)$ corrisponda al valore corretto in $pk$.
+La sicurezza si fonda sull'impossibilità di invertire $H$: nessun avversario puó ricavare $x_0$ da $H(x_0)$.
+
+\paragraph{Estensione a un messaggio intero.}
+Per firmare un digest di 256 bit occorrono 256 coppie $(x_{i,0},\, x_{i,1})$, per un totale di 512 segreti:
+\begin{align*}
+    sk &= \bigl\{\,(x_{0,0}, x_{0,1}),\; (x_{1,0}, x_{1,1}),\;
+           \ldots,\; (x_{255,0}, x_{255,1})\,\bigr\}, \\
+    pk &= \bigl\{\,(H(x_{0,0}), H(x_{0,1})),\;
+           \ldots,\; (H(x_{255,0}), H(x_{255,1}))\,\bigr\}.
+\end{align*}
+Per firmare un messaggio $M$ con hash $h = H(M) = b_0 b_1 \cdots b_{255}$, si rivela un valore per ciascun bit:
+\[
+    \sigma = (x_{0,b_0},\; x_{1,b_1},\; \ldots,\; x_{255,b_{255}}).
+\]
+
+Il limite fondamentale di Lamport è che ogni coppia di chiavi può essere usata \emph{una sola volta}. Se si firmano due messaggi diversi con le stesse
+chiavi, si rivelano entrambi i segreti $x_{i,0}$ e $x_{i,1}$ per alcuni indici $i$, consentendo a un avversario di forgiare firme arbitrarie.
+Inoltre, firme e chiavi pubblica risultano molto grandi (circa 16\,KB per un digest di 256 bit) \cite{fips205, bellare_rogaway}.
+
+\subsubsection{Winternitz OTS (W-OTS e WOTS+): catene di hash}
+
+Lo schema Winternitz, evolutosi in WOTS+ all'interno di SLH-DSA, riduce drasticamente la dimensione di chiavi e firme rispetto a Lamport, sfruttando il concetto di \textit{catena di hash} \cite{fips205}.
+
+\paragraph{Idea: iterare la funzione hash.}
+Si definisce $f^k(x)$ come $H$ applicata $k$ volte:
+\[
+    f^0(x) = x, \qquad f^k(x) = H\!\bigl(f^{k-1}(x)\bigr) \quad (k \ge 1).
+\]
+Con parametro di Winternitz $w = 16$ si lavora con blocchi da 4 bit
+(valori $v \in [0, 15]$). Per ciascun blocco:
+\begin{itemize}
+    \item \textbf{Chiave privata}: $x$ (valore casuale),
+    \item \textbf{Chiave pubblica}: $f^{15}(x) = H^{15}(x)$ (l'estremo della catena),
+    \item \textbf{Firma} del valore $v$: $f^v(x)$,
+    \item \textbf{Verifica}: dato $f^v(x)$ e il valore $v$, si applica $H$
+          ancora $15-v$ volte e si controlla di raggiungere $f^{15}(x)$.
+\end{itemize}
+
+Un avversario che volesse forgiare la firma del valore $3$ (più alto) dovrebbe produrre $f^3(x)$: partendo da $f^2(x)$ può solo procedere
+\emph{avanti} nella catena applicando ulteriori hash, ma non può invertirla. Forgiare un valore \emph{più basso} richiederebbe invece
+di invertire $H$, impossibile per ipotesi. Nei sistemi reali si aggiunge un \textit{checksum} che vincola la firma a non poter abbassare
+i valori, chiudendo entrambe le direzioni di attacco \cite{fips205}.
+
+\subsubsection{Albero di Merkle: da One-Time a Many-Time}
+
+Lamport e WOTS+ sono schemi \textit{one-time}: ogni chiave può firmare un solo messaggio. Merkle propose di aggregare molte
+chiavi OTS in un'unica chiave pubblica tramite un albero di hash, consentendo di firmare un numero arbitrario di messaggi \cite{fips205,
+bellare_rogaway}.
+
+\paragraph{Struttura.}
+Si generano $2^h$ coppie di chiavi OTS. Le chiavi pubbliche vengono messe nelle foglie dell'albero; ogni nodo interno è l'hash della
+concatenazione dei suoi due figli. La radice è l'unica chiave pubblica globale:
+
+\begin{verbatim}
+             Root  (pk globale)
+            /          \
+      H(n0,n1)       H(n2,n3)
+       /    \          /    \
+      n0    n1        n2    n3
+      ↑      ↑         ↑      ↑
+   OTS_0  OTS_1     OTS_2  OTS_3
+\end{verbatim}
+
+\paragraph{Firma e verifica.}
+Per firmare l'\mbox{$i$-esimo} messaggio si usa la coppia OTS numero $i$ e si allega il \textit{percorso di autenticazione}, ovvero i nodi fratelli
+lungo il cammino dalla foglia alla radice. Il verificatore ricalcola la radice partendo dalla firma OTS e dal percorso, confrontandola con la chiave pubblica.
+
+\paragraph{Esempio con 4 foglie (firma con OTS\_1).}
+\begin{verbatim}
+Percorso di autenticazione: [n0,  H(n2,n3)]
+
+Verifica:
+  H(pk_OTS_1)           = n1
+  H(n0, n1)             = H(n0,n1)
+  H(H(n0,n1), H(n2,n3)) = Root
+\end{verbatim}
+
+Con un albero di $2^{10} = 1024$ foglie è possibile firmare 1024 messaggi
+con una singola chiave pubblica; il percorso di autenticazione ha lunghezza solo $h = 10$ nodi \cite{fips205}.
+
+\subsubsection{XMSS: aggiungere lo stato}
+
+XMSS (\textit{eXtended Merkle Signature Scheme}) è l'evoluzione sicura dell'albero di Merkle \cite{fips205}. Utilizza
+indirizzi specifici (ADRS) per ogni chiamata alla funzione hash, impedendo attacchi multi-target e garantendo la resistenza post-quantistica.
+
+Il suo principale limite è la natura \textit{stateful}: poiché ogni chiave WOTS+ può essere usata una sola volta, il firmatario deve mantenere un
+indice che tiene traccia di quali chiavi ha già impiegato. Se tale stato viene perso -- ad esempio ripristinando un backup -- o riutilizzato per
+errore, la sicurezza crolla irrimediabilmente.
+
+\subsubsection{SLH-DSA}
+
+Possiamo quindi analizzare SLH-DSA che è la versione ufficiale di SPHINCS+. La sua innovazione principale è eliminare completamente lo stato,
+rendendo lo schema \textit{stateless} \cite{fips205}.
+
+\paragraph{Ipertree: un albero di alberi}
+
+Invece di un unico grande albero di Merkle, SLH-DSA usa una struttura a
+$d$ livelli in cui ogni foglia di un livello superiore è la radice di un
+albero al livello inferiore \cite{fips205}:
+
+\begin{verbatim}
+Livello d-1:  [Albero Merkle 0]
+                     |
+Livello d-2:  [Albero 0,0]  [Albero 0,1]  ...  [Albero 0, 2^h']
+                     |
+     ...
+Livello 0:    [Albero 0,...,0]  ...  (moltissimi alberi)
+                     |
+              Foglie FORS  (per il messaggio)
+\end{verbatim}
+
+Ad esempio, nella variante \texttt{SLH-DSA-SHA2-128s} (sicurezza a 128 bit):
+\[
+    n = 16\text{ byte},\quad
+    h = 63\text{ (altezza totale)},\quad
+    d = 7\text{ livelli},\quad
+    h' = h/d = 9\text{ (altezza del sottoalbero)}.
+\]
+
+\paragraph{Generazione deterministica tramite PRF.}
+Il segreto alla base dello schema stateless è che tutte le chiavi OTS e
+FORS vengono generate deterministicamente da una chiave segreta master
+tramite una funzione pseudorandom:
+\begin{verbatim}
+sk_seed : 16 byte segreti (la vera chiave privata)
+pk_seed : 16 byte pubblici
+
+Per generare la chiave OTS all'indice (layer, tree, leaf):
+  x_{layer,tree,leaf} = PRF(sk_seed, ADRS(layer, tree, leaf))
+\end{verbatim}
+dove ADRS è una struttura che codifica l'indirizzo esatto della chiave
+nell'ipertree. In questo modo non è necessario memorizzare nulla: qualsiasi
+chiave può essere ricalcolata al volo. Per ogni firma si genera un valore
+casuale $R$ (o deterministicamente da $sk\_seed$ e $M$), da cui si derivano:
+\[
+    (\mathit{idx\_tree},\; \mathit{idx\_leaf}) = H(R,\, pk\_seed,\, M).
+\]
+Con $h = 63$ l'ipertree conta $2^{63}$ foglie FORS totali, la probabilità
+di selezionare due volte lo stesso indice è dell'ordine di $1/2^{63}$,
+suffucientemente bassa: non è più necessario tenere traccia di alcuno stato.
+
+\subsubsection{FORS: Few-Time Signature per il messaggio}
+
+Invece di impiegare WOTS+ per firmare direttamente il messaggio finale,
+SLH-DSA usa FORS (\textit{Forest Of Random Subsets}), uno schema
+\textit{Few-Time Signature} (FTS) composto da una foresta di $k$ piccoli
+alberi, ciascuno con $2^a$ foglie \cite{fips205}.
+
+Il messaggio (dopo hashing) viene diviso in $k$ blocchi da $a$ bit.
+Ogni blocco è un indice $\mathit{idx}_i \in [0, 2^a - 1]$ che seleziona
+una foglia in uno dei $k$ alberi:
+\begin{verbatim}
+H(messaggio) → k=14 blocchi da a=12 bit ciascuno
+             → idx_0, idx_1, ..., idx_13  (ognuno in [0, 4095])
+
+Per ogni albero i:
+  - Rivela la foglia idx_i (chiave privata random)
+  - Allega il percorso di autenticazione nel sottoalbero i
+  - La radice dell'albero i entra nella firma
+\end{verbatim}
+La chiave pubblica di FORS è l'hash delle $k$ radici.
+
+\subsubsection{Struttura completa di una firma SLH-DSA}
+
+Una firma SLH-DSA è composta da tre elementi principali \cite{fips205}:
+
+\begin{enumerate}
+    \item \textbf{Randomizer} $R$: valore casuale (o deterministico) che
+          rende il processo non deterministico.
+    \item \textbf{Firma FORS} $\sigma_\text{FORS}$: firma il digest del
+          messaggio tramite la foresta di sottoalberi.
+    \item \textbf{Firma Hypertree} $\sigma_\text{HT}$: una serie di firme
+          WOTS+ che autenticano la chiave pubblica FORS risalendo fino alla
+          radice principale (\texttt{PK.root}).
+\end{enumerate}
+
+A titolo di confronto, una firma RSA-2048 occupa soli 256\,byte. La firma
+SLH-DSA è significativamente più grande, ma questo è il compromesso
+inevitabile per garantire sicurezza post-quantistica basata esclusivamente
+sulle funzioni hash \cite{fips205, bellare_rogaway}.
+
+Il NIST ha standardizzato 12 varianti con forma: SLH-DSA-{hash}-{n}{t},
+
+dove \texttt{hash} è SHA-2 o SHAKE, $n$ indica il livello di sicurezza (128, 192 o 256\,bit) e $t \in \{s, f\}$
+distingue la variante \textit{small} (firma compatta, più lenta) da quella \textit{fast} (firma più grande, più veloce). La Tabella~\ref{tab:slhdsa_variants}
+riporta un confronto tra alcune varianti rappresentative \cite{fips205}.
+
+\begin{table}[h]
+\centering
+\caption{Confronto tra varianti SLH-DSA selezionate.}
+\label{tab:slhdsa_variants}
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Parametro} & \textbf{PK} & \textbf{SK} & \textbf{Firma} \\
+\hline
+SHA2-128s & 32\,B & 64\,B & 7\,856\,B  \\
+SHA2-128f & 32\,B & 64\,B & 17\,088\,B \\
+SHA2-256s & 64\,B & 128\,B & 29\,792\,B \\
+\hline
+\end{tabular}
+\end{table}
+
+Le chiavi pubblica e privata rimangono compatte; è la firma ad essere grande,
+perché deve includere tutti i percorsi di autenticazione nell'ipertree e
+la firma FORS. Questo è il compromesso tipico degli schemi hash-based.
+
+\medskip
+\noindent Il filo conduttore dell'intera evoluzione può essere sintetizzato
+come segue:
+\[
+    \text{Lamport OTS}
+    \;\to\; \text{W-OTS}
+    \;\to\; \text{Albero di Merkle}
+    \;\to\; \text{XMSS (stateful)}
+\]
+\[
+    \;\to\; \text{SLH-DSA (stateless)}.
+\]
+In ogni passo la sicurezza si basa esclusivamente sulla difficoltà di
+invertire funzioni hash, senza dipendere da strutture algebriche che
+l'algoritmo di Shor potrebbe sfruttare \cite{fips205, bellare_rogaway}.
 
 \section{Code-based Cryptography}
 
