@@ -66,3 +66,75 @@ post-quantistico basato su ML-KEM a fianco dei due ratchet classici esistenti.
 La sfida tecnica principale era mantenere i messaggi di protocollo a dimensioni
 comparabili a quelle attuali (circa 36 byte), un vincolo imposto dall'efficienza
 della rete~\cite{signal_spqr}.
+
+%----------------------------------------------------------------------------------------
+\section{Apple: il protocollo PQ3 per iMessage}
+
+Nel febbraio 2024, Apple ha annunciato PQ3, definendolo come il più significativo
+aggiornamento crittografico nella storia di iMessage~\cite{apple_pq3}. PQ3 è
+notevole non solo per la sua solidità tecnica, ma anche per la scala di deployment:
+centinaia di milioni di dispositivi in tutto il mondo hanno ricevuto automaticamente
+il nuovo protocollo con l'aggiornamento a iOS~17.4, iPadOS~17.4, macOS~14.4 e
+watchOS~10.4.
+
+\paragraph{La tassonomia dei livelli di sicurezza.}
+Apple ha introdotto una propria classificazione per confrontare i protocolli di
+messaggistica:
+\begin{itemize}
+    \item \textbf{Livello 1}: crittografia end-to-end classica, senza protezione
+          post-quantistica (es. iMessage precedente al 2024).
+    \item \textbf{Livello 2}: PQC applicata solo all'handshake iniziale, senza
+          rekeying post-quantistico continuo (es. Signal con PQXDH).
+    \item \textbf{Livello 3}: PQC applicata sia all'handshake che a tutta la
+          conversazione, con rekeying automatico post-quantistico (PQ3).
+\end{itemize}
+PQ3 è il primo protocollo di messaggistica ampiamente distribuito a raggiungere
+il Livello~3~\cite{apple_pq3}.
+
+\paragraph{Architettura di PQ3.}
+Ogni dispositivo genera una coppia di chiavi ML-KEM aggiuntiva durante la
+registrazione iMessage, pubblicandola sui server Apple insieme alle chiavi
+ECC esistenti. Questo consente al mittente di stabilire un'iniziale chiave
+post-quantistica anche quando il destinatario è offline.
+
+Per l'ongoing key establishment, PQ3 implementa un meccanismo di rekeying
+periodico integrato nel flusso dei messaggi: nuove chiavi ML-KEM vengono
+inviate all'interno della conversazione e usate per derivare chiavi di
+cifratura \textit{forward secret}, garantendo che la compromissione di una
+chiave in un dato momento non comprometta né i messaggi passati né quelli
+futuri. Il rekeying avviene al più ogni 50 messaggi o almeno una volta ogni
+sette giorni~\cite{apple_pq3}.
+
+Il protocollo mantiene un approccio ibrido: ECC e ML-KEM coesistono, così che
+la sicurezza complessiva non sia mai inferiore a quella di ECC soltanto.
+L'autenticazione dell'identità degli utenti rimane affidata a ECDSA, in quanto
+i chip \textit{Secure Enclave} dei dispositivi Apple non supportano ancora
+algoritmi post-quantistici per la firma -- un'area di sviluppo futuro identificata
+da Apple come ``Livello 4''~\cite{apple_pq3_analysis}.
+
+%----------------------------------------------------------------------------------------
+\section{Google Chrome e Cloudflare: PQC nel protocollo TLS}
+
+La protezione delle connessioni HTTPS è il caso d'uso con il maggiore impatto
+immediato, essendo TLS il protocollo su cui si fonda la sicurezza dell'intero
+web. Google e Cloudflare hanno guidato la transizione in questo ambito.
+
+\paragraph{Chrome: da X25519Kyber768 a ML-KEM768.}
+Nell'agosto 2023, Google ha abilitato in Chrome~116 il supporto
+per l'algoritmo ibrido \texttt{X25519Kyber768}, combinando lo scambio di chiave
+classico X25519 con Kyber-768 per proteggere il traffico TLS~1.3 contro
+attacchi \textit{store-now-decrypt-later}~\cite{google_chrome_pqc}.
+
+Con Chrome~124 (aprile 2024), il meccanismo è stato abilitato per impostazione
+predefinita per tutti gli utenti desktop. Il passaggio ha immediatamente rivelato
+un problema di compatibilità pratica: il messaggio TLS \textit{ClientHello},
+che normalmente rientrava in un singolo pacchetto TCP, aumentava di dimensione
+a causa delle chiavi post-quantistiche più grandi, causando errori di connessione
+su server, proxy e firewall che non gestivano correttamente messaggi segmentati su
+più pacchetti~\cite{chrome_compatibility}.
+
+Con Chrome~131 (novembre 2024), Google ha completato la transizione allo standard
+definitivo, adottando \texttt{ML-KEM768+X25519} (codepoint TLS \texttt{0x11EC}),
+in sostituzione del precedente \texttt{Kyber768+X25519} (codepoint \texttt{0x6399}).
+Le due varianti sono incompatibili tra loro, rendendo necessario l'aggiornamento
+coordinato di client e server~\cite{google_mlkem}.
