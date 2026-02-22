@@ -1,0 +1,68 @@
+Nei capitoli precedenti abbiamo esaminato i fondamenti teorici della crittograifa
+post-quantistica e gli algoritmi standardizzati dal NIST\@. Il peridio 2023--2025
+ha segnato però un passaggio decisivo: da casi di studio a implementazioni su scala globale.
+
+Aziende come Google, Apple, Cloudflare e Signal hanno già distribuito protocolli
+ibridi ai propri utenti, mentre la NSA ha pubblicato una tablle di marcia vincolante 
+per tutti i sistemi classificati statunitensi. 
+Questo capitolo analizza le principali implementazioni reali, la strategia ibrida 
+che li accomuna e le sfide emerse in fase di distribuzione.
+
+%----------------------------------------------------------------------------------------
+\section[L'approccio ibrido]{L'approccio ibrido: PQC più crittografia classica}
+
+Tutte le implementazioni che discuteremo condividono una scelta architetturale fondatamentale:
+non sostituire completamente la crittografia classica on quella pqc, ma parallelizzarle in uno
+stato ibrido. La motivazione è Bivalente. 
+
+In primo lugo la prudenza scientifica. Gli algoritmi PQC standardizzati nel 2024 sono stati
+sottoposti a un processo di revisione pubblica senza precedenti, ma non possono vantare
+la stessa profondità di analisi crittoanalitica accumulata a ECC o RSA in decenni di uso. 
+L'approccio ibrido quindi garantisce che la sicurezza complessiva non sia inferiore di quella
+classica, anche nell'ipotetica eventualità che una vulnerabilità venisse scoperta nei nuovi algoritmi. 
+
+Dall'altro lato, la protezione conntro il modello di minaccia \textit{harvest now, decrypt later}
+di cui abbiamo parlato nel Capitolo~\ref{chap:Crittografia post quantistica} richiede che i dati siano 
+protetti con algoritmi resistenti ai quantistici fin da subito, anche se la minaccia è solo potenziale.
+Aggiungendo un layer ML-KEM difianco ad un classico, anche il traffico passato è al sicuro da attacchi, 
+poiché un futuro attacante quantistico dovrebbe violare entrambi i protocolli. 
+
+Il costo di questa scelta è un aumento della dimensione dei messaggi e un lieve overhead computazionale, 
+che le implementazioni concrete hanno dimostrate essere accettabile nella pratica. 
+
+%----------------------------------------------------------------------------------------
+\section{Signal: PQXDH e il Triple Retchet}
+
+Signal è un’app di messaggistica istantanea che ha fatto della privacy e della sicurezza il suo intero scopo di vita
+ed infatti è stata la prima a deployare la crittografia post-quantistica su larga scala. Nel settembre 2023, 
+la Signal Foundation ha annunciato l'aggiornamento del prodocollo di handshake da X3DH
+(\textit{Extended Triple Diffie-Hellman}) a PQXDH
+(\textit{Post-Quantum Extended Diffie-Hellman})~\cite{signal_pqxdh}.
+
+\paragraph{Architettura di PQXDH.}
+Il protocollo X3DH originale derivava un segreto condiviso combinando quattro scambi Diffie-Hellman su
+curve ellittiche. PQXDH aggiunge un ulteriore segreto ottenuto tramite CRYSTALS-Kyber (ora ML-KEM), 
+mescolando la chiave inizale tramite una funzione derivazione: 
+\[
+    SK = \mathrm{KDF}(\,DH_1 \,\|\, DH_2 \,\|\, DH_3 \,\|\, DH_4 \,\|\, SS_{\mathrm{KEM}}\,)
+\]
+dove $SS_{\mathrm{KEM}}$ è il segreto derivato dall'incapsulamento ML-KEM\@.
+La scelta di combianre i due segretii -- piuttosto di sostituire l'uno con l'altro --
+implica che un attaccante deve violare sia X25519 che ML-KEM per compromettere la sessione~\cite{signal_pqxdh}.
+
+PQXDH usa Kyber-1024 (livello di sicurezza equivalente ad AES-256) e fornisce
+\textit{post-quantum forward secrecy} grazie all'uso di chiavi pre-pubblicate
+monouso (\textit{one-time prekeys}) che vengono cancellate dopo l'uso. Tuttavia,
+nella prima revisione del protocollo l'autenticazione delle chiavi di identità
+restava affidata a ECDSA -- un punto su cui si prevedono evoluzioni future per
+resistere anche ad avversari quantistici attivi~\cite{signal_pqxdh}.
+
+\paragraph{Dal Double Ratchet al Triple Ratchet.}
+PQXDH protegge la fase di handshake iniziale, ma il \textit{Double Ratchet} --
+il meccanismo che fornisce forward secrecy e post-compromise security durante
+l'intera conversazione -- rimaneva classico. Per colmare questo gap, Signal ha
+successivamente sviluppato il \textit{Triple Ratchet}, che integra un ratchet
+post-quantistico basato su ML-KEM a fianco dei due ratchet classici esistenti.
+La sfida tecnica principale era mantenere i messaggi di protocollo a dimensioni
+comparabili a quelle attuali (circa 36 byte), un vincolo imposto dall'efficienza
+della rete~\cite{signal_spqr}.
