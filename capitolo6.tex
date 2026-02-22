@@ -184,3 +184,69 @@ La direttiva si estende di fatto anche all'industria privata: i contractor della
 difesa e i fornitori di prodotti per sistemi classificati sono tenuti ad allinearsi
 alle stesse scadenze come requisito contrattuale, creando un effetto di propagazione
 verso l'intero settore tecnologico.
+
+%----------------------------------------------------------------------------------------
+\section{Sfide pratiche dell'adozione}
+
+L'esperienza delle implementazioni reali ha evidenziato alcune sfide ricorrenti
+che vanno oltre la mera sostituzione algoritmica.
+
+\paragraph{Dimensione delle chiavi e dei messaggi.}
+Gli algoritmi PQC producono chiavi e ciphertext significativamente più grandi
+rispetto ai loro equivalenti classici. Come osservato con Chrome, una chiave
+pubblica ML-KEM è dell'ordine di 1~KB, contro i 32~byte di X25519. Questo
+può frammentare messaggi di protocollo che tipicamente si assumevano di piccola
+dimensione, causando incompatibilità con implementazioni rigide di TLS, firewall
+e middleware
+
+\paragraph{Overhead computazionale.}
+Le operazioni ML-KEM sono computazionalmente più costose delle operazioni ECDH,
+ma l'overhead nella pratica è limitato: studi empirici mostrano che un handshake
+TLS ibrido aggiunge tipicamente 1--2 millisecondi di latenza, un costo accettabile
+per la maggior parte delle applicazioni. Il principale impatto si avverte invece
+su dispositivi con risorse limitate (IoT, smart card, hardware embedded), dove
+la disponibilità di implementazioni ottimizzate diventa critica.
+
+\paragraph{Crypto-agility.}
+La transizione in corso ha rafforzato il concetto di \textit{crypto-agility}:
+la capacità di un sistema di aggiornare i propri algoritmi crittografici senza
+richiedere una riprogettazione completa. La migrazione da Kyber a ML-KEM in Chrome
+-- algoritmi quasi identici ma con codepoint TLS incompatibili -- è un esempio
+concreto di quanto sia importante progettare i sistemi in modo da separare
+l'interfaccia crittografica dalla sua implementazione~\cite{google_mlkem}.
+
+\paragraph{Compatibilità e ossificazione dei protocolli.}
+Cambiamenti nello stack crittografico si scontrano spesso con la cosiddetta
+\textit{ossificazione dei protocolli}: l'insieme di assunzioni implicite -- spesso
+scritte nel codice di middleware, proxy e firewall -- su dimensioni, formati e
+comportamenti dei pacchetti. Il caso Chrome~124 ha dimostrato che anche un
+cambiamento ben pianificato e segnalato con anticipo può causare interruzioni
+significative in produzione, sottolineando l'importanza di un rollout graduale e
+di strumenti di test pubblici~\cite{chrome_compatibility, cloudflare_pq2024}.
+
+La Tabella~\ref{tab:impl_confronto} riassume le principali implementazioni
+analizzate in questo capitolo.
+
+\begin{table}[ht]
+\centering
+\caption{Confronto tra le principali implementazioni industriali di PQC (2023--2024).}
+\label{tab:impl_confronto}
+\begin{tabular}{lllll}
+\hline
+\textbf{Attore} & \textbf{Protocollo} & \textbf{Algoritmo} & \textbf{Contesto} & \textbf{Anno} \\
+\hline
+Signal      & PQXDH         & ML-KEM-1024 + X25519  & Messaggistica E2EE & 2023 \\
+Google      & TLS ibrido    & ML-KEM-768 + X25519   & HTTPS (Chrome)     & 2023 \\
+Cloudflare  & TLS ibrido    & ML-KEM-768 + X25519   & CDN / TLS globale  & 2023 \\
+Apple       & PQ3           & ML-KEM + ECDH (P-256) & iMessage           & 2024 \\
+NSA         & CNSA 2.0      & ML-KEM, ML-DSA,       & Sistemi classificati & 2022 \\
+            &               & SLH-DSA, LMS/XMSS    &                    &      \\
+\hline
+\end{tabular}
+\end{table}
+
+Una considerazione finale che possiamo trarre da tutte queste implementazioni è che la scelta
+ibrida non è una soluzione temporanea ma una strategia deliberata per garantire sicurezza a lungo termine. 
+Nessuna delle implementazioni che abbiaamo analizzato prevede di rimuovere completamente la crittografia
+calssica, preferendo invece costruire un livello di protezione aggiuntivo che sia conservativo rispetto 
+all'incertezza crittoanalitica. 
