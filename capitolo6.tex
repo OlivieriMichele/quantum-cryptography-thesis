@@ -138,3 +138,49 @@ definitivo, adottando \texttt{ML-KEM768+X25519} (codepoint TLS \texttt{0x11EC}),
 in sostituzione del precedente \texttt{Kyber768+X25519} (codepoint \texttt{0x6399}).
 Le due varianti sono incompatibili tra loro, rendendo necessario l'aggiornamento
 coordinato di client e server~\cite{google_mlkem}.
+
+\paragraph{Cloudflare: deployment su scala globale.}
+Cloudflare ha abilitato il supporto per la key agreement post-quantistica sulle
+connessioni verso i propri server di origine nel settembre 2023. Entro l'inizio
+del 2024, circa il 2\% di tutte le connessioni TLS~1.3 stabilite con Cloudflare
+era già protetto con crittografia post-quantistica, grazie principalmente
+all'esperimento di Chrome al 10\% degli utenti. Cloudflare prevedeva un'adozione
+a due cifre percentuali entro la fine del 2024 con la progressiva estensione
+del supporto da parte di Chrome, Firefox e altri browser~\cite{cloudflare_pq2024}.
+
+%----------------------------------------------------------------------------------------
+\section{La direttiva NSA: CNSA 2.0}
+
+Sul fronte normativo, la cornice di riferimento più stringente è quella definita
+dalla NSA con il \textit{Commercial National Security Algorithm Suite 2.0}
+(CNSA~2.0), pubblicato nel settembre 2022~\cite{nsa_cnsa2}.
+
+CNSA~2.0 è vincolante per tutti i sistemi di sicurezza nazionale (NSS) statunitensi
+e fissa una tabella di marcia precisa per la migrazione verso la crittografia
+post-quantistica, con le seguenti scadenze principali~\cite{nsa_cnsa2}:
+
+\begin{itemize}
+    \item \textbf{Immediata}: avvio della transizione per firma di software e
+          firmware, con adozione di LMS e XMSS (schemi a firma basati su hash,
+          già standardizzati in NIST SP~800-208).
+    \item \textbf{Entro il 2025}: supporto agli algoritmi CNSA~2.0 per browser,
+          server web e servizi cloud.
+    \item \textbf{Dal 2027}: tutti i nuovi sistemi NSS devono essere conformi
+          a CNSA~2.0 per impostazione predefinita.
+    \item \textbf{Entro il 2031}: algoritmi post-quantistici obbligatori per
+          tutte le categorie di sistemi NSS.
+    \item \textbf{Entro il 2035}: migrazione completa; gli algoritmi classici
+          RSA ed ECC saranno dismessi per tutti i sistemi di sicurezza nazionale.
+\end{itemize}
+
+Gli algoritmi approvati da CNSA~2.0 per la fase a regime sono ML-KEM (FIPS~203)
+per lo scambio di chiave, ML-DSA (FIPS~204) per le firme digitali, e SLH-DSA
+(FIPS~205) come alternativa basata esclusivamente su funzioni hash. In fase di
+transizione, la NSA consente soluzioni ibride (classico + PQC) per garantire
+interoperabilità, ma chiarisce che l'obiettivo finale è l'eliminazione completa
+degli algoritmi vulnerabili~\cite{nsa_cnsa2}.
+
+La direttiva si estende di fatto anche all'industria privata: i contractor della
+difesa e i fornitori di prodotti per sistemi classificati sono tenuti ad allinearsi
+alle stesse scadenze come requisito contrattuale, creando un effetto di propagazione
+verso l'intero settore tecnologico.
