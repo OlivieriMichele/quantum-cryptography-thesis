@@ -32,11 +32,11 @@
 \frontmatter\frontispiece
 
 \begin{abstract}	
-La sicurezza digiatle moderna pone le sue fondamenta sulla crittografia a chiave pubblica, che a sua volta delega la sua robustezza alla difficoltà computazione di problemi matematici come il problema della fattorizzazione e del logaritmo discreto. 
+La sicurezza digitale moderna pone le sue fondamenta sulla crittografia a chiave pubblica, che a sua volta delega la sua robustezza alla difficoltà computazione di problemi matematici come il problema della fattorizzazione e del logaritmo discreto. 
 Tuttavia, l'avvento dei computer quantistici minaccia di compromettere la sicurezza di questi sistemi, poiché algoritmi quantistici come quello di Shor possono risolvere tali problemi in tempo polinomiale sfruttando la trasformata di Fourier quantistica per individuare la periodicità di funzioni modulari.
-Sebbe i comuper quantistici attuali non siano ancora in grado di violare chiavi crittografiche reali, il modello di minaccia "harvest now, decrypt later" rende la transizione urgente già oggi. 
+Sebbe i computer quantistici attuali non siano ancora in grado di violare chiavi crittografiche reali, il modello di minaccia "harvest now, decrypt later" rende la transizione urgente già oggi. 
 
-In risposta, la crittografia post-quantistica sviluppa algoritmmi fondati su famiglie di problemi matematici considerati resistenti anche ad attacchi quantistici: reticoli algebrici, codici correttori di errori e funzioni hash. Il NIST ha pubblicato nel 2024 i primi standar ufficiali ML-KEM, ML-DSA e SLH-DSA, segnando l'inizio concreto della transizione.
+In risposta, la crittografia post-quantistica sviluppa algoritmi fondati su famiglie di problemi matematici considerati resistenti anche ad attacchi quantistici: reticoli algebrici, codici correttori di errori e funzioni hash. Il NIST ha pubblicato nel 2024 i primi standard ufficiali ML-KEM, ML-DSA e SLH-DSA, segnando l'inizio concreto della transizione.
 Questa tesi analizza i fondamenti teorici di questa evoluzione, dall'impatto di Shor sulla crittografia classica alle soluzioni post-quantistiche, evidenziando come la migrazione verso questi nuovi paradigmi rappresenti una delle sfide più attuali e urgenti per la sicurezza informatica globale del prossimo decennio.
 \end{abstract}
 
@@ -254,7 +254,7 @@ di Shor e il suo impatto su RSA.
 \label{chap:Computazione quantistica}
 %----------------------------------------------------------------------------------------
 
-Entriamo ora nel vivo della relazione: sviscerare i segreti dietro l'algoritmo di Shor per capire in che modo rompere il protocllo RSA appena descritto, e analogamente per l'algoritmo di Grover per capire che impatto ha sulla crittografia simmetrica.
+Entriamo ora nel vivo della relazione: sviscerare i segreti dietro l'algoritmo di Shor per capire in che modo rompere il protocollo RSA appena descritto, e analogamente per l'algoritmo di Grover per capire che impatto ha sulla crittografia simmetrica.
 Per farlo avremo prima bisogno di introdurre alcuni concetti di base della computazione quantistica tali algoritmi utilizzano per ottenere i loro risultati. 
 Una volta compresi questi concetti potremo procedere alla spiegazione degli algoritmi.
 
@@ -340,13 +340,22 @@ Per mitigare questo problema si ricorre a tecniche di \emph{correzione d'errore 
 
 A causa dei limiti tecnologici attuali, in particolare dei tempi di coerenza ridotti e dell'elevato tasso di errore, l'esecuzione di algoritmi quantistici complessi su larga scala, come quelli necessari per rompere RSA a 2048 bit, non è ancora praticabile. Le stime più ottimistiche suggeriscono che potrebbero essere necessari dai 10 ai 20 anni prima che computer quantistici sufficientemente potenti diventino disponibili~\cite{mosca2018cybersecurity}.
 
-\section{Stato attuale della crittografia post-quantistica}
+\section{Stato attuale della PQC}
 
-Il processo di standardizzazione del NIST, iniziato nel 2016, ha portato alla selezione di diversi algoritmi post-quantistici nel 2022~\cite{alagic2022nist}. Tra questi, CRYSTALS-Kyber per lo scambio di chiavi e CRYSTALS-Dilithium per le firme digitali rappresentano i candidati principali per la sostituzione di RSA ed ECC.
+Il processo di standardizzazione del NIST, conclusosi nel 2024 con la 
+pubblicazione di FIPS~203, 204 e 205~\cite{alagic2022nist}, ha segnato 
+il passaggio dalla ricerca alla produzione. Come documentato nel 
+Capitolo~\ref{chap:Implementazioni}, aziende come Apple, Google, Signal 
+e Cloudflare hanno già distribuito protocolli ibridi su centinaia di 
+milioni di dispositivi, dimostrando che la transizione non è solo 
+teoricamente possibile ma industrialmente praticabile.
 
-Nonostante la disponibilità di questi standard, la transizione verso la crittografia post-quantistica presenta sfide significative. Molti algoritmi PQC richiedono chiavi più grandi e operazioni più costose rispetto ai loro equivalenti classici, il che può comportare problemi di compatibilità con l'infrastruttura esistente e impatti sulle prestazioni.
-
-Per mitigare i rischi durante la fase di transizione, molte organizzazioni stanno adottando un approccio di \emph{crittografia ibrida}, combinando un algoritmo classico con uno post-quantistico~\cite{bindel2019transitioning}. Questo approccio garantisce sicurezza anche nel caso in cui uno dei due algoritmi si rivelasse vulnerabile in futuro. Implementazioni di questo tipo sono già state annunciate da grandi aziende tecnologiche come Apple (con il protocollo PQ3) e Google (con il supporto per algoritmi ibridi in Chrome).
+Le sfide che rimangono aperte riguardano principalmente i contesti con 
+risorse limitate (IoT, smart card, sistemi embedded), dove l'overhead 
+di chiavi e firme più grandi è ancora un vincolo critico, e la 
+standardizzazione dei protocolli di autenticazione post-quantistica 
+dell'identità, ancora affidata in larga parte a ECDSA anche nelle 
+implementazioni più avanzate.
 
 \section{Prospettive future}
 

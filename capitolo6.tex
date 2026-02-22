@@ -1,9 +1,9 @@
-Nei capitoli precedenti abbiamo esaminato i fondamenti teorici della crittograifa
-post-quantistica e gli algoritmi standardizzati dal NIST\@. Il peridio 2023--2025
+Nei capitoli precedenti abbiamo esaminato i fondamenti teorici della crittografia
+post-quantistica e gli algoritmi standardizzati dal NIST\@. Il periodo 2023--2025
 ha segnato però un passaggio decisivo: da casi di studio a implementazioni su scala globale.
 
 Aziende come Google, Apple, Cloudflare e Signal hanno già distribuito protocolli
-ibridi ai propri utenti, mentre la NSA ha pubblicato una tablle di marcia vincolante 
+ibridi ai propri utenti, mentre la NSA ha pubblicato una tabelle di marcia vincolante 
 per tutti i sistemi classificati statunitensi. 
 Questo capitolo analizza le principali implementazioni reali, la strategia ibrida 
 che li accomuna e le sfide emerse in fase di distribuzione.
@@ -13,7 +13,7 @@ che li accomuna e le sfide emerse in fase di distribuzione.
 
 Tutte le implementazioni che discuteremo condividono una scelta architetturale fondatamentale:
 non sostituire completamente la crittografia classica on quella pqc, ma parallelizzarle in uno
-stato ibrido. La motivazione è Bivalente. 
+stato ibrido. La motivazione è bivalente. 
 
 In primo lugo la prudenza scientifica. Gli algoritmi PQC standardizzati nel 2024 sono stati
 sottoposti a un processo di revisione pubblica senza precedenti, ma non possono vantare
@@ -21,7 +21,7 @@ la stessa profondità di analisi crittoanalitica accumulata a ECC o RSA in decen
 L'approccio ibrido quindi garantisce che la sicurezza complessiva non sia inferiore di quella
 classica, anche nell'ipotetica eventualità che una vulnerabilità venisse scoperta nei nuovi algoritmi. 
 
-Dall'altro lato, la protezione conntro il modello di minaccia \textit{harvest now, decrypt later}
+Dall'altro lato, la protezione contro il modello di minaccia \textit{harvest now, decrypt later}
 di cui abbiamo parlato nel Capitolo~\ref{chap:Crittografia post quantistica} richiede che i dati siano 
 protetti con algoritmi resistenti ai quantistici fin da subito, anche se la minaccia è solo potenziale.
 Aggiungendo un layer ML-KEM difianco ad un classico, anche il traffico passato è al sicuro da attacchi, 
@@ -47,7 +47,7 @@ mescolando la chiave inizale tramite una funzione derivazione:
     SK = \mathrm{KDF}(\,DH_1 \,\|\, DH_2 \,\|\, DH_3 \,\|\, DH_4 \,\|\, SS_{\mathrm{KEM}}\,)
 \]
 dove $SS_{\mathrm{KEM}}$ è il segreto derivato dall'incapsulamento ML-KEM\@.
-La scelta di combianre i due segretii -- piuttosto di sostituire l'uno con l'altro --
+La scelta di combinare i due segreti -- piuttosto di sostituire l'uno con l'altro --
 implica che un attaccante deve violare sia X25519 che ML-KEM per compromettere la sessione~\cite{signal_pqxdh}.
 
 PQXDH usa Kyber-1024 (livello di sicurezza equivalente ad AES-256) e fornisce
@@ -248,5 +248,5 @@ NSA         & CNSA 2.0      & ML-KEM, ML-DSA,       & Sistemi classificati & 202
 Una considerazione finale che possiamo trarre da tutte queste implementazioni è che la scelta
 ibrida non è una soluzione temporanea ma una strategia deliberata per garantire sicurezza a lungo termine. 
 Nessuna delle implementazioni che abbiaamo analizzato prevede di rimuovere completamente la crittografia
-calssica, preferendo invece costruire un livello di protezione aggiuntivo che sia conservativo rispetto 
+classica, preferendo invece costruire un livello di protezione aggiuntivo che sia conservativo rispetto 
 all'incertezza crittoanalitica. 
