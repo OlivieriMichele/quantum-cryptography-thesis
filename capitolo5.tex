@@ -17,7 +17,7 @@ La questione riguarda la differenza tra il "risolvere" un problema e il "verific
     \item \textbf{NP-hard}: Problemi almeno tanto difficili quanto i problemi più difficili in NP. Formalmente, un problema è NP-hard se ogni problema in NP può essere ridotto a esso in tempo polinomiale; pertanto, trovare un algoritmo polinomiale per un problema NP-hard implicherebbe che $P = NP$. Esempio: il problema del commesso viaggiatore (TSP).
 \end{itemize}
 
-\begin{figure}[htbp]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{./figures/bqp_graph.png}
     \caption{Relazione tra le classi di complessità classiche (P, NP, PSPACE) e la classe quantistica BQP.}
@@ -439,7 +439,7 @@ bellare_rogaway}.
 Si generano $2^h$ coppie di chiavi OTS. Le chiavi pubbliche vengono messe nelle foglie dell'albero; ogni nodo interno è l'hash della
 concatenazione dei suoi due figli. La radice è l'unica chiave pubblica globale:
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\textwidth]{./figures/merkle_tree.png}
     \caption{Struttura di un albero di Merkle con 8 foglie $K_0, \ldots, K_7$.
@@ -506,7 +506,7 @@ Ad esempio, nella variante \texttt{SLH-DSA-SHA2-128s} (sicurezza a 128 bit):
     h' = h/d = 9\text{ (altezza del sottoalbero)}.
 \]
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.60\textwidth]{./figures/slhdsa_hypertree.png}
     \caption{Architettura ipertree di SLH-DSA con $d = 3$ livelli. Gli alberi
