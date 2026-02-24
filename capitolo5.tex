@@ -17,14 +17,14 @@ La questione riguarda la differenza tra il "risolvere" un problema e il "verific
     \item \textbf{NP-hard}: Problemi almeno tanto difficili quanto i problemi più difficili in NP. Formalmente, un problema è NP-hard se ogni problema in NP può essere ridotto a esso in tempo polinomiale; pertanto, trovare un algoritmo polinomiale per un problema NP-hard implicherebbe che $P = NP$. Esempio: il problema del commesso viaggiatore (TSP).
 \end{itemize}
 
+Da qui emerge una domanda cruciale: per ogni problema la cui soluzione è facile da verificare (NP) è anche facile trovare una soluzione (P)? Se $P = NP$, allora ogni volta che possiamo controllare rapidamente una soluzione deve esistere anche un modo veloce per trovarla. La comunità scientifica concorda che $P \neq NP$, il che implica che esistono problemi intrinsecamente difficili per i quali trovare la soluzione richiede tempi esponenziali, anche se verificarli è immediato, e questo rappresenta il fondamento della sicurezza crittografica.
+
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.6\textwidth]{./figures/bqp_graph.png}
+    \includegraphics[width=0.55\textwidth]{./figures/bqp_graph.png}
     \caption{Relazione tra le classi di complessità classiche (P, NP, PSPACE) e la classe quantistica BQP.}
     \label{fig:gerarchia_complessità}
 \end{figure}
-
-Da qui emerge una domanda cruciale: per ogni problema la cui soluzione è facile da verificare (NP) è anche facile trovare una soluzione (P)? Se $P = NP$, allora ogni volta che possiamo controllare rapidamente una soluzione deve esistere anche un modo veloce per trovarla. La comunità scientifica concorda che $P \neq NP$, il che implica che esistono problemi intrinsecamente difficili per i quali trovare la soluzione richiede tempi esponenziali, anche se verificarli è immediato, e questo rappresenta il fondamento della sicurezza crittografica.
 
 \paragraph{BQP}
 Nel caso della nostra analisi, è importante introdurre in questa gerarchia anche la classe BQP (Bounded-error Quantum Polynomial time), che rappresenta l'insieme dei problemi risolvibili efficientemente da un computer quantistico. 
@@ -33,6 +33,8 @@ In questa classe di problemi (BQP) rientrano infatti RSA e ECC che, come abbiamo
 
 \paragraph{PQC}
 La crittografia post-quantistica sposta quindi la sua sicurezza dai problemi di classe NP-Intermediate (di cui si ritiene facciano parte RSA ed ECC) a nuove famiglie matematiche che, allo stato attuale della ricerca, non presentano vulnerabilità esponenziali quantistiche; in particolare, molti di questi schemi sono legati a varianti di problemi NP-hard.
+
+Abbiamo capito quindi i diversi livelli di difficoltà dei problemi matematici, ora possiamo entrare nel vivo della relazione e analizzare le famiglie di algoritmi post-quantistici a partire dalle ppiù promettenti: i reticoli algebrici.
 
 \section{Lattice-baces}
 
